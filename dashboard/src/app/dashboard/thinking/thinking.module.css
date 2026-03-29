@@ -1,0 +1,28 @@
+.layout { display: grid; grid-template-columns: 60% 1fr; gap: var(--space-lg); align-items: start; }
+.timelinePanel { overflow: hidden; }
+.taskSelector { padding: var(--space-lg); border-bottom: 1px solid var(--border-ghost); }
+.selector { width: 100%; padding: var(--space-sm) var(--space-md); background: var(--surface-lowest); border: 1px solid var(--border-ghost); border-radius: var(--radius-md); color: var(--text-primary); font-size: 0.85rem; }
+.timeline { padding: var(--space-lg); }
+.timelineHeader { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-xl); }
+.sourceTag { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-lg); padding: var(--space-sm) var(--space-md); background: var(--surface-low); border-radius: var(--radius-md); }
+.steps { display: flex; flex-direction: column; }
+.step { display: flex; gap: var(--space-md); }
+.stepLine { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 20px; }
+.stepDot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.stepConnector { width: 2px; flex: 1; background: var(--outline-variant); min-height: 20px; }
+.stepContent { flex: 1; padding-bottom: var(--space-lg); }
+.stepHeader { margin-bottom: var(--space-xs); }
+.outputSection { margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--border-ghost); }
+.outputContent { margin-top: var(--space-sm); padding: var(--space-md); background: var(--surface-low); border-left: 2px solid var(--closer); border-radius: var(--radius-md); font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+.auditStrip { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-md); margin-top: var(--space-lg); padding: var(--space-lg); background: var(--surface-low); border-radius: var(--radius-md); }
+.auditItem { display: flex; flex-direction: column; gap: var(--space-xs); }
+.contextPanel { display: flex; flex-direction: column; gap: var(--space-lg); }
+.contextCard { overflow: hidden; }
+.contextHeader { padding: var(--space-lg); border-bottom: 1px solid var(--border-ghost); }
+.contextBody { padding: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-md); }
+.ctxRow { display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0; }
+.threadSection { padding: var(--space-lg); border-top: 1px solid var(--border-ghost); display: flex; flex-direction: column; gap: var(--space-md); }
+.emailItem { padding: var(--space-md); background: var(--surface-low); border-radius: var(--radius-md); border-left: 2px solid var(--closer); }
+.globalStats { padding: var(--space-lg); }
+.statGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); }
+.statGrid div { display: flex; flex-direction: column; gap: var(--space-xs); }

@@ -1,0 +1,163 @@
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.liveIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: var(--surface);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-ghost);
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 55% 1fr;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--border-ghost);
+}
+
+.activityCard {
+  max-height: 600px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.activityList {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-sm) 0;
+}
+
+.activityItem {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  transition: var(--transition-fast);
+}
+.activityItem:hover { background: var(--surface-low); }
+
+.activityIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-high);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.activityContent { flex: 1; overflow: hidden; }
+
+.activityHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: 2px;
+}
+
+.riskCard, .churnCard {}
+
+.riskList, .churnList {
+  padding: var(--space-sm) 0;
+}
+
+.riskItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-lg);
+  border-left: 3px solid transparent;
+  transition: var(--transition-fast);
+}
+.riskItem:hover { background: var(--surface-low); border-left-color: var(--danger); }
+
+.riskInfo { overflow: hidden; }
+
+.riskMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.riskArr {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.churnItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  transition: var(--transition-fast);
+}
+.churnItem:hover { background: var(--surface-low); }
+
+.churnInfo { flex: 1; overflow: hidden; }
+
+.churnTrend {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.protocolBar {
+  display: flex;
+  gap: var(--space-xl);
+  padding: var(--space-lg);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-ghost);
+}
+
+.protocol {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.empty {
+  padding: var(--space-2xl);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 1100px) {
+  .statsRow { grid-template-columns: repeat(2, 1fr); }
+  .mainGrid { grid-template-columns: 1fr; }
+}

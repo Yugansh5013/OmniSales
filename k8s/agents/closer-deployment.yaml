@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: closer-agent
+  namespace: omnisales
+  labels:
+    app: closer-agent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: closer-agent
+  template:
+    metadata:
+      labels:
+        app: closer-agent
+    spec:
+      containers:
+        - name: closer-agent
+          image: omnisales-closer-agent:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9001
+          envFrom:
+            - secretRef:
+                name: omnisales-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: closer-agent
+  namespace: omnisales
+spec:
+  selector:
+    app: closer-agent
+  ports:
+    - port: 9001
+      targetPort: 9001
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: closer-agent-pdb
+  namespace: omnisales
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: closer-agent

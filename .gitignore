@@ -1,0 +1,25 @@
+.env
+.env.*
+!.env.example
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+.idea/
+.vscode/
+
+# Ignore root-level log, output, and aux text/json/md files
+/*.log
+/*.txt
+!/requirements.txt
+/*.json
+!/package-lock.json
+!/package.json
+/*.md
+!/project_des.md
+!/README.md
+
+# Ignore ALL python scripts in the root directory (tests and aux files)
+/*.py

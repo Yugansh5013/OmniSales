@@ -1,0 +1,235 @@
+version: "3.9"
+
+services:
+  # ── Infrastructure ──
+  # NOTE: PostgreSQL is hosted on Neon Cloud (no local container needed)
+
+  redis:
+    image: redis:7-alpine
+    container_name: omnisales-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: omnisales-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: omnisales-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: omnisales-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command: |
+      "
+      echo 'Creating Kafka topics...'
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --replication-factor 1 --partitions 3 --topic closer.deal_won
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --replication-factor 1 --partitions 3 --topic closer.deal_lost
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --replication-factor 1 --partitions 3 --topic prospector.lead_qualified
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --replication-factor 1 --partitions 3 --topic guardian.churn_risk
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --replication-factor 1 --partitions 3 --topic guardian.upsell_opportunity
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --replication-factor 1 --partitions 3 --topic spy.competitor_event
+      echo 'All topics created.'
+      "
+
+  # ── MCP Servers ──
+
+  mcp-approvals:
+    build:
+      context: .
+      dockerfile: mcp-servers/approvals/Dockerfile
+    container_name: omnisales-mcp-approvals
+    ports:
+      - "8004:8004"
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  mcp-knowledge:
+    build:
+      context: .
+      dockerfile: mcp-servers/knowledge/Dockerfile
+    container_name: omnisales-mcp-knowledge
+    ports:
+      - "8003:8003"
+    env_file: .env
+
+  mcp-crm:
+    build:
+      context: .
+      dockerfile: mcp-servers/crm/Dockerfile
+    container_name: omnisales-mcp-crm
+    ports:
+      - "8001:8001"
+    env_file: .env
+
+  # ── Agents ──
+
+  closer-agent:
+    build:
+      context: .
+      dockerfile: agents/closer/Dockerfile
+    container_name: omnisales-closer
+    ports:
+      - "9001:9001"
+    env_file: .env
+    environment:
+      MCP_CRM_URL: http://mcp-crm:8001/mcp
+      MCP_KNOWLEDGE_URL: http://mcp-knowledge:8003/mcp
+      MCP_APPROVALS_URL: http://mcp-approvals:8004/mcp
+    depends_on:
+      mcp-crm:
+        condition: service_started
+      mcp-knowledge:
+        condition: service_started
+      mcp-approvals:
+        condition: service_started
+
+  prospector-agent:
+    build:
+      context: .
+      dockerfile: agents/prospector/Dockerfile
+    container_name: omnisales-prospector
+    ports:
+      - "9002:9002"
+    env_file: .env
+    environment:
+      MCP_CRM_URL: http://mcp-crm:8001/mcp
+      MCP_KNOWLEDGE_URL: http://mcp-knowledge:8003/mcp
+      MCP_APPROVALS_URL: http://mcp-approvals:8004/mcp
+    depends_on:
+      mcp-crm:
+        condition: service_started
+      mcp-knowledge:
+        condition: service_started
+      mcp-approvals:
+        condition: service_started
+
+  guardian-agent:
+    build:
+      context: .
+      dockerfile: agents/guardian/Dockerfile
+    container_name: omnisales-guardian
+    ports:
+      - "9003:9003"
+    env_file: .env
+    environment:
+      MCP_CRM_URL: http://mcp-crm:8001/mcp
+      MCP_APPROVALS_URL: http://mcp-approvals:8004/mcp
+    depends_on:
+      mcp-crm:
+        condition: service_started
+      mcp-approvals:
+        condition: service_started
+
+  orchestrator-agent:
+    build:
+      context: .
+      dockerfile: agents/orchestrator/Dockerfile
+    container_name: omnisales-orchestrator
+    ports:
+      - "9004:9004"
+    env_file: .env
+    environment:
+      MCP_CRM_URL: http://mcp-crm:8001/mcp
+      SCAN_INTERVAL_SECONDS: "60"
+      DATABASE_URL: ${DATABASE_URL}
+    depends_on:
+      mcp-crm:
+        condition: service_started
+      closer-agent:
+        condition: service_started
+      prospector-agent:
+        condition: service_started
+      guardian-agent:
+        condition: service_started
+
+  # ── A2A Server ──
+
+  spy-a2a:
+    build:
+      context: .
+      dockerfile: agents/spy/Dockerfile
+    container_name: omnisales-spy-a2a
+    ports:
+      - "8080:8080"
+    env_file: .env
+
+  # ── API Gateway ──
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: omnisales-api-gateway
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis:6379
+      KAFKA_BROKERS: kafka:9092
+      MCP_APPROVALS_URL: http://mcp-approvals:8004/mcp
+      MCP_KNOWLEDGE_URL: http://mcp-knowledge:8003/mcp
+      MCP_CRM_URL: http://mcp-crm:8001/mcp
+      SPY_A2A_URL: http://spy-a2a:8080
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      mcp-approvals:
+        condition: service_started
+      mcp-knowledge:
+        condition: service_started
+      mcp-crm:
+        condition: service_started
+      spy-a2a:
+        condition: service_started
+
+  # ── Frontend Dashboard ──
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: omnisales-dashboard
+    ports:
+      - "3000:3000"
+    depends_on:
+      api-gateway:
+        condition: service_started

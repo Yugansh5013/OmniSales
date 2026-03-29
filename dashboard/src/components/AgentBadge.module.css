@@ -1,0 +1,5 @@
+.agentBadge {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+.sm { font-size: 0.65rem; padding: 1px 6px; }

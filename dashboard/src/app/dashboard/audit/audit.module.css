@@ -1,0 +1,29 @@
+.tableCard { overflow-x: auto; padding: 0; }
+
+.expandedCell {
+  background: var(--surface-low) !important;
+  padding: var(--space-lg) !important;
+}
+
+.expandedContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.reasoningText, .draftText {
+  margin-top: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--surface-lowest);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  color: var(--text-secondary);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.draftText {
+  border-left: 2px solid var(--closer);
+}

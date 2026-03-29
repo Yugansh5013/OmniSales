@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-crm
+  namespace: omnisales
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-crm
+  template:
+    metadata:
+      labels:
+        app: mcp-crm
+    spec:
+      containers:
+        - name: mcp-crm
+          image: omnisales-mcp-crm:latest
+          ports:
+            - containerPort: 8001
+          envFrom:
+            - secretRef:
+                name: omnisales-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-crm
+  namespace: omnisales
+spec:
+  selector:
+    app: mcp-crm
+  ports:
+    - port: 8001
+      targetPort: 8001

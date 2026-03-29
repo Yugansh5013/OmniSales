@@ -1,0 +1,81 @@
+.summaryRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.summaryCard {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  align-items: flex-start;
+}
+
+.summaryValue {
+  font-size: 1.75rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+
+.tableCard {
+  overflow-x: auto;
+  padding: 0;
+}
+
+.row_high { border-left: 3px solid var(--danger); }
+.row_medium { border-left: 3px solid var(--warning); }
+.row_low { border-left: 3px solid transparent; }
+
+.expandedRow {
+  background: var(--surface-low) !important;
+  padding: var(--space-lg) !important;
+}
+
+.signals { margin-bottom: var(--space-md); }
+
+.signalList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.accountMeta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  margin-top: var(--space-md);
+}
+
+.accountMeta div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Scan Result Banner */
+.scanResult {
+  padding: var(--space-lg);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.02));
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-xl);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.scanResultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flaggedList {
+  margin-top: var(--space-md);
+}
