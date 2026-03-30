@@ -20,6 +20,7 @@ venv/
 /*.md
 !/project_des.md
 !/README.md
+!/omnisales_detailed_report.md
 
 # Ignore ALL python scripts in the root directory (tests and aux files)
 /*.py
