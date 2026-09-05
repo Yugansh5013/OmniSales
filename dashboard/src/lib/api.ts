@@ -19,7 +19,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(error.detail || `API Error: ${res.status}`);
+    const msg = error.detail || error.error?.message || `API Error: ${res.status}`;
+    const errObj = new Error(msg);
+    (errObj as unknown as { response: unknown }).response = error;
+    throw errObj;
   }
   return res.json();
 }
@@ -43,6 +46,7 @@ export interface DashboardStats {
   active_deals: number;
   at_risk_deals: number;
   high_churn_accounts: number;
+  at_risk_arr?: number;
   pending_approvals: number;
   total_accounts: number;
   avg_health_score: number;
@@ -61,10 +65,16 @@ export interface Deal {
   risk_level: string;
   last_activity: string;
   lead_id?: string;
+  discount_pct?: number;
+  contract_months?: number;
+  payment_terms?: string;
+  custom_sla?: boolean;
+  tier?: string;
+  owner?: string;
   contact_name?: string;
   contact_email?: string;
   contact_title?: string;
-  closer_thread?: Array<{ from: string; to: string; subject: string; body: string; date: string }>;
+  closer_thread?: Array<{ from: string; to: string; subject?: string; body: string; date?: string; timestamp?: string }>;
   agent_log?: Record<string, unknown>[];
   created_at?: string;
 }
@@ -82,12 +92,17 @@ export interface TimelineEvent {
   tokens_used?: number;
   cost?: number;
   feedback?: string;
+  source?: string;
+  scan_number?: number;
+  trigger?: string;
+  [key: string]: unknown;
 }
 
-export function fetchDeals(stage?: string, risk_level?: string): Promise<Deal[]> {
+export function fetchDeals(stage?: string, risk_level?: string, owner?: string): Promise<Deal[]> {
   const params = new URLSearchParams();
   if (stage) params.set('stage', stage);
   if (risk_level) params.set('risk_level', risk_level);
+  if (owner) params.set('owner', owner);
   const qs = params.toString();
   return request(`/api/deals${qs ? `?${qs}` : ''}`);
 }
@@ -104,6 +119,62 @@ export function triggerCloser(dealId: string) {
   return request(`/api/deals/${dealId}/trigger`, { method: 'POST' });
 }
 
+export interface DealDeskEvaluation {
+  status: 'approved' | 'policy_violation' | 'approved_with_override';
+  violations_count: number;
+  violations: Array<{ code: string; field: string; message: string; severity: string }>;
+  counter_proposal: {
+    proposed_discount_pct: number;
+    proposed_contract_months: number;
+    proposed_payment_terms: string;
+    proposed_tier: string;
+    proposed_custom_sla: boolean;
+    base_arr: number;
+    discounted_arr: number;
+    total_contract_value: number;
+    customer_annual_savings: number;
+    explanation: string;
+  } | null;
+  policy_version: string;
+}
+
+export function evaluateDealDesk(dealId: string, terms: {
+  discount_pct?: number;
+  contract_months?: number;
+  payment_terms?: string;
+  custom_sla?: boolean;
+  override?: boolean;
+  override_reason?: string;
+}): Promise<DealDeskEvaluation> {
+  return request(`/api/deals/${dealId}/deal-desk/evaluate`, {
+    method: 'POST',
+    body: JSON.stringify(terms),
+  });
+}
+
+export interface PaymentLinkResponse {
+  id: string;
+  short_url: string;
+  amount: number;
+  status: string;
+  is_simulated: boolean;
+  deal_desk_evaluation?: DealDeskEvaluation;
+}
+
+export function generatePaymentLink(dealId: string, payload: {
+  discount_pct?: number;
+  contract_months?: number;
+  payment_terms?: string;
+  custom_sla?: boolean;
+  override?: boolean;
+  override_reason?: string;
+}): Promise<PaymentLinkResponse> {
+  return request(`/api/deals/${dealId}/payment-link`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 // ── Leads ──
 export interface Lead {
   id: string;
@@ -114,21 +185,24 @@ export interface Lead {
   icp_score: number | null;
   tier: string;
   status: string;
+  owner?: string;
   enrichment?: {
     founded?: number;
     employees?: number;
     funding?: string;
-    industry?: string;
     tech_stack?: string[];
-    revenue_est?: string;
     signals?: string[];
-    contacts?: Array<{ name: string; title: string; linkedin: string }>;
+    industry?: string;
+    revenue_est?: string;
   };
 }
 
-export function fetchLeads(status?: string): Promise<Lead[]> {
-  const qs = status ? `?status=${status}` : '';
-  return request(`/api/leads${qs}`);
+export function fetchLeads(status?: string, owner?: string): Promise<Lead[]> {
+  const params = new URLSearchParams();
+  if (status) params.set('status', status);
+  if (owner) params.set('owner', owner);
+  const qs = params.toString();
+  return request(`/api/leads${qs ? `?${qs}` : ''}`);
 }
 
 export function fetchLead(id: string): Promise<Lead> {
@@ -139,7 +213,21 @@ export function triggerProspector(leadId: string) {
   return request(`/api/leads/${leadId}/trigger`, { method: 'POST' });
 }
 
-// ── Accounts ──
+export function importLeads(leads: Array<{
+  company: string;
+  contact_name?: string;
+  email?: string;
+  title?: string;
+  source?: string;
+  owner?: string;
+}>): Promise<{ status: string; imported: number }> {
+  return request('/api/leads/import', {
+    method: 'POST',
+    body: JSON.stringify(leads),
+  });
+}
+
+// ── Accounts (Guardian) ──
 export interface Account {
   id: string;
   company: string;
@@ -150,237 +238,245 @@ export interface Account {
   usage_pct: number;
   support_tickets: number;
   last_login: string;
-  metadata: {
-    usage_trend?: number[];
+  owner?: string;
+  metadata?: {
     signals?: string[];
-    nps_score?: number;
-    contract_end?: string;
+    contract_renewal?: string;
+    top_signals?: string[];
+    risk_tier?: string;
   };
 }
 
-export function fetchAccounts(minChurnRisk?: number): Promise<Account[]> {
-  const qs = minChurnRisk ? `?min_churn_risk=${minChurnRisk}` : '';
-  return request(`/api/accounts${qs}`);
+export function fetchAccounts(minChurnRisk?: number, owner?: string): Promise<Account[]> {
+  const params = new URLSearchParams();
+  if (minChurnRisk) params.set('min_churn_risk', String(minChurnRisk));
+  if (owner) params.set('owner', owner);
+  const qs = params.toString();
+  return request(`/api/accounts${qs ? `?${qs}` : ''}`);
 }
 
-export function triggerGuardian() {
+export function triggerGuardian(): Promise<{
+  accounts_analyzed: number;
+  flagged_count: number;
+  flagged: Array<{
+    account_id: string;
+    company: string;
+    arr?: number;
+    plan?: string;
+    churn_risk?: number;
+    risk_tier?: string;
+    action?: string;
+    top_signals?: string[];
+  }>;
+  draft?: string;
+  task_id?: string;
+  status?: string;
+}> {
   return request('/api/accounts/analyze', { method: 'POST' });
 }
 
-export interface AgentStatusData {
-  total_runs: number;
-  total_cost: number;
-  total_tokens: number;
-  agent_metrics: Record<string, { runs: number; approved: number; rejected: number; cost: number; tokens: number }>;
-}
-
-export function fetchAgentStatus(): Promise<AgentStatusData> {
-  return request('/api/agents/status');
-}
-
-// ── Tasks (Approval Queue) ──
+// ── Tasks / Approvals ──
 export interface AgentTask {
   id: string;
   agent_name: string;
   task_type: string;
   status: string;
   target_name: string;
-  draft: string;
+  target_id?: string;
+  draft: string | null;
   reasoning: string;
-  created_at: string;
   model_used?: string;
   tokens_used?: number;
   cost?: number;
+  created_at: string;
   feedback?: string;
 }
 
-export function fetchTasks(status?: string, agent?: string): Promise<AgentTask[]> {
+export function fetchTasks(status = 'pending_approval', agent = '', owner = ''): Promise<AgentTask[]> {
   const params = new URLSearchParams();
   if (status) params.set('status', status);
   if (agent) params.set('agent', agent);
+  if (owner) params.set('owner', owner);
   const qs = params.toString();
   return request(`/api/tasks${qs ? `?${qs}` : ''}`);
 }
 
-export function approveTask(taskId: string, approved: boolean, feedback = '') {
+export function approveTask(taskId: string, approved: boolean, feedback = '', draft?: string) {
   return request(`/api/tasks/${taskId}/approve`, {
     method: 'POST',
-    body: JSON.stringify({ approved, feedback }),
+    body: JSON.stringify({ approved, feedback, draft }),
   });
-}
-
-// ── Audit ──
-export function fetchAuditTrail(agentName?: string): Promise<AgentTask[]> {
-  if (agentName) return request(`/api/audit/${agentName}`);
-  return request('/api/audit');
-}
-
-// ── Agent Activity (merges agent_tasks + scan dispatch data) ──
-export interface AgentActivity extends AgentTask {
-  source?: string;
-  scan_number?: number;
-  trigger?: string;
-}
-
-interface DispatchDetail {
-  agent?: string;
-  entity?: string;
-  entity_id?: string;
-  company?: string;
-  trigger?: string;
-  result_action?: string;
-  result_status?: string;
-  http_status?: number;
-  at_risk_companies?: string[];
-}
-
-interface ScanReportFull extends ScanReport {
-  dispatch_details?: string | DispatchDetail[];
-}
-
-export async function fetchAgentActivity(agentName?: string, limit = 20): Promise<AgentActivity[]> {
-  // Try the new backend endpoint first; fall back to client-side merge
-  try {
-    const params = new URLSearchParams();
-    if (agentName) params.set('agent', agentName);
-    params.set('limit', String(limit));
-    const result = await request<AgentActivity[]>(`/api/agent-activity?${params.toString()}`);
-    if (Array.isArray(result) && result.length > 0) return result;
-  } catch {
-    // Endpoint not available — fall through to client-side extraction
-  }
-
-  // Fallback: merge agent_tasks + scan_reports dispatch_details client-side
-  const [tasks, scans] = await Promise.all([
-    fetchAuditTrail(agentName).catch(() => [] as AgentTask[]),
-    fetchOrchestratorHistory(limit) as Promise<ScanReportFull[]>,
-  ]);
-
-  const activities: AgentActivity[] = [];
-
-  // Extract dispatch details from scan reports
-  for (const scan of scans) {
-    if (!scan.dispatch_details) continue;
-    let details: DispatchDetail[];
-    if (typeof scan.dispatch_details === 'string') {
-      try { details = JSON.parse(scan.dispatch_details); } catch { continue; }
-    } else {
-      details = scan.dispatch_details;
-    }
-    if (!Array.isArray(details)) continue;
-
-    for (const d of details) {
-      const aName = d.agent || 'unknown';
-      if (agentName && aName !== agentName) continue;
-      activities.push({
-        id: `scan-${scan.id}-${d.entity_id || d.entity || ''}`,
-        agent_name: aName,
-        task_type: d.result_action || d.entity || 'scan',
-        status: d.result_status || 'completed',
-        target_name: d.company || (d.at_risk_companies ? d.at_risk_companies.join(', ') : d.entity || 'Unknown'),
-        draft: '',
-        reasoning: [
-          `1. Orchestrator scan #${scan.scan_number} triggered dispatch`,
-          `2. Trigger condition: ${d.trigger || 'threshold met'}`,
-          `3. Agent '${aName}' invoked via HTTP (status ${d.http_status || '?'})`,
-          `4. Action determined: ${d.result_action || 'N/A'}`,
-          `5. Result status: ${d.result_status || 'N/A'}`,
-        ].join('\n'),
-        created_at: scan.started_at,
-        model_used: 'llama-3.3-70b-versatile',
-        tokens_used: 2400 + Math.abs(hashCode(d.entity_id || '') % 1600),
-        cost: parseFloat((0.002 + Math.abs(hashCode(d.entity_id || '') % 100) / 100000).toFixed(5)),
-        source: 'scan_report',
-        scan_number: scan.scan_number,
-        trigger: d.trigger,
-      });
-    }
-  }
-
-  // Merge: tasks first, then activities (deduplicated)
-  const seen = new Set(tasks.map(t => t.target_name + t.agent_name));
-  const merged: AgentActivity[] = [...tasks];
-  for (const act of activities) {
-    const key = act.target_name + act.agent_name;
-    if (!seen.has(key)) {
-      merged.push(act);
-      seen.add(key);
-    }
-  }
-
-  merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  return merged.slice(0, limit);
-}
-
-function hashCode(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) {
-    h = ((h << 5) - h + s.charCodeAt(i)) | 0;
-  }
-  return h;
 }
 
 // ── Orchestrator ──
-export interface ScanReport {
-  id: string;
-  scan_number: number;
-  triggered_by: string;
-  started_at: string;
-  completed_at: string | null;
-  status: string;
-  deals_scanned: number;
-  deals_dispatched: number;
-  leads_scanned: number;
-  leads_dispatched: number;
-  accounts_scanned: number;
-  accounts_dispatched: number;
-  total_dispatched: number;
-  summary: string | null;
-  dispatch_details?: string | DispatchDetail[];
+export function triggerOrchestratorScan(): Promise<ScanReport> {
+  return request<ScanReport>('/api/orchestrator/scan', { method: 'POST' });
+}
+export const scanOrchestrator = triggerOrchestratorScan;
+
+export interface OrchestratorChatResponse {
+  response?: string;
+  reply?: string;
+  timestamp?: string;
+  context_loaded?: boolean;
+  [key: string]: unknown;
 }
 
-export function orchestratorChat(message: string) {
-  return request('/api/orchestrator/chat', {
+export function orchestratorChat(message: string, threadId?: string): Promise<OrchestratorChatResponse> {
+  return request<OrchestratorChatResponse>('/api/orchestrator/chat', {
     method: 'POST',
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, thread_id: threadId }),
   });
 }
 
-export async function fetchOrchestratorHistory(limit = 10): Promise<ScanReport[]> {
-  const data = await request<{ reports: ScanReport[]; count: number }>(`/api/orchestrator/history?limit=${limit}`);
-  return Array.isArray(data) ? data : (data.reports ?? []);
+export interface ScanReport {
+  id: string;
+  scan_number: number;
+  status?: string;
+  started_at: string;
+  completed_at: string;
+  total_dispatched: number;
+  dispatch_details: Array<Record<string, unknown>>;
+  summary?: string;
+  triggered_by?: string;
+  deals_scanned?: number;
+  deals_dispatched?: number;
+  leads_scanned?: number;
+  leads_dispatched?: number;
+  accounts_scanned?: number;
+  accounts_dispatched?: number;
+  [key: string]: unknown;
 }
 
-export function triggerOrchestratorScan() {
-  return request('/api/orchestrator/scan', { method: 'POST' });
+export function fetchOrchestratorHistory(limit = 10): Promise<ScanReport[]> {
+  return request<ScanReport[]>(`/api/orchestrator/history?limit=${limit}`);
 }
 
-export function fetchOrchestratorStatus() {
-  return request('/api/orchestrator/status');
+// ── Evals Scorecard ──
+export interface EvalsScorecard {
+  total_tasks_evaluated: number;
+  approved_count: number;
+  rejected_count: number;
+  approval_rate_pct: number;
+  rejection_rate_pct: number;
+  fallback_count: number;
+  fallback_rate_pct: number;
+  model_distribution: Record<string, number>;
+  agent_breakdown: Record<string, {
+    total: number;
+    approved: number;
+    rejected: number;
+    approval_rate_pct: number;
+    avg_tokens: number;
+    total_cost_usd: number;
+  }>;
+  offline_benchmarks?: Record<string, unknown>;
 }
 
-// ── Competitors ──
+export async function fetchEvalsScorecard(): Promise<EvalsScorecard> {
+  const res = await request<Record<string, any>>('/api/evals/scorecard');
+  if (res && res.scorecard) {
+    return {
+      ...res.scorecard,
+      offline_benchmarks: res.latest_offline_eval,
+      evaluated_at: res.evaluated_at,
+    };
+  }
+  return res as unknown as EvalsScorecard;
+}
+
+// ── Spy A2A / Competitors ──
 export interface Competitor {
   id: string;
   name: string;
-  website: string;
-  last_scraped: string;
+  strengths: string[];
+  weaknesses: string[];
+  pricing: string;
+  displacement_strategy: string;
 }
 
 export function fetchCompetitors(): Promise<Competitor[]> {
   return request('/api/competitors');
 }
 
-// ── A2A ──
-export function fetchSpyAgentCard() {
-  return request('/api/a2a/agent-card');
-}
-
-export function fetchBattlecard(competitor: string) {
+export function fetchA2ABattlecard(competitor: string) {
   return request(`/api/a2a/battlecard/${competitor}`, { method: 'POST' });
 }
 
-// ── Health ──
-export function fetchHealth() {
-  return request('/api/health');
+export function fetchA2AWinback(competitor: string) {
+  return request(`/api/a2a/winback/${competitor}`, { method: 'POST' });
 }
+
+// ── Audit & Agent Activity ──
+export function fetchAuditEvents() {
+  return request('/api/audit');
+}
+
+export function fetchAgentActivity(filter?: string | number): Promise<TimelineEvent[]> {
+  return fetchAuditEvents() as unknown as Promise<TimelineEvent[]>;
+}
+
+export type AgentActivity = TimelineEvent;
+
+export interface SystemServiceProbe {
+  name: string;
+  status: "healthy" | "degraded" | "unhealthy" | "unreachable";
+  port?: string;
+  latency_ms?: number;
+  detail?: string;
+}
+
+export interface SystemProbesResponse {
+  timestamp: string;
+  services: Record<string, SystemServiceProbe>;
+  groq_keys_count?: number;
+}
+
+export function fetchSystemProbes(): Promise<SystemProbesResponse> {
+  return request('/api/system/probes');
+}
+
+export function fetchNotificationEmail(): Promise<{ email: string }> {
+  return request('/api/settings/notification-email');
+}
+
+export function updateNotificationEmail(email: string): Promise<{ status: string; email: string }> {
+  return request('/api/settings/notification-email', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+// ── CRM Sync & Ingestion ──
+export interface CrmSyncSettings {
+  auto_sync: boolean;
+  interval_seconds: number;
+  last_sync?: string | null;
+  provider?: string;
+  portal_id?: string;
+  connected?: boolean;
+}
+
+export interface CrmSyncResult {
+  status: string;
+  synced_leads: number;
+  synced_deals: number;
+  timestamp: string;
+  hubspot_portal?: string;
+}
+
+export function fetchCrmSyncSettings(): Promise<CrmSyncSettings> {
+  return request<CrmSyncSettings>('/api/settings/crm-sync');
+}
+
+export function updateCrmSyncSettings(settings: { auto_sync: boolean; interval_seconds: number }): Promise<{ status: string }> {
+  return request('/api/settings/crm-sync', {
+    method: 'POST',
+    body: JSON.stringify(settings),
+  });
+}
+
+export function triggerCrmSync(): Promise<CrmSyncResult> {
+  return request<CrmSyncResult>('/api/crm/sync', { method: 'POST' });
+}
+

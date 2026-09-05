@@ -1,209 +1,140 @@
-/** OmniSales Utility Library — All computed metrics, zero hardcoded values */
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-// ── Currency Formatting ──
-export function formatCurrency(amount: number): string {
-  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`;
-  if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}K`;
-  return `$${amount.toFixed(0)}`;
+/** Combines Tailwind class names cleanly */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 
-export function formatCurrencyFull(amount: number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+/** Formats currency amounts */
+export function formatCurrency(amount: number | null | undefined): string {
+  if (amount === null || amount === undefined) return "$0";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
-// ── Time Formatting ──
-export function formatRelativeTime(dateStr: string): string {
-  const now = Date.now();
-  const date = new Date(dateStr).getTime();
-  const diffMs = now - date;
-  const diffSecs = Math.floor(diffMs / 1000);
-  const diffMins = Math.floor(diffSecs / 60);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffSecs < 60) return 'just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+/** Formats percentages */
+export function formatPercent(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "0%";
+  return `${Math.round(value * 100)}%`;
 }
 
-export function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric',
-  });
-}
-
-export function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('en-US', {
-    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
-}
-
-// ── Deal / Pipeline Calculations ──
-export function computeDaysInStage(lastActivity: string): number {
-  const now = Date.now();
-  const activity = new Date(lastActivity).getTime();
-  return Math.max(0, Math.floor((now - activity) / 86_400_000));
-}
-
-export function computeDaysSince(dateStr: string): number {
-  return computeDaysInStage(dateStr);
-}
-
-export function computePipelineValue(deals: Array<{ arr: number; stage: string }>): number {
-  return deals
-    .filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost')
-    .reduce((sum, d) => sum + Number(d.arr), 0);
-}
-
-export function computeStageStats(deals: Array<{ arr: number; stage: string }>) {
-  const stages: Record<string, { count: number; totalArr: number }> = {};
-  for (const deal of deals) {
-    if (!stages[deal.stage]) stages[deal.stage] = { count: 0, totalArr: 0 };
-    stages[deal.stage].count++;
-    stages[deal.stage].totalArr += Number(deal.arr);
-  }
-  return stages;
-}
-
-// ── Health / Risk Calculations ──
-export function computeHealthColor(score: number): string {
-  if (score >= 0.7) return 'var(--success)';
-  if (score >= 0.4) return 'var(--warning)';
-  return 'var(--danger)';
-}
-
-export function computeRiskBadge(riskLevel: string): { label: string; className: string } {
-  switch (riskLevel) {
-    case 'at_risk': return { label: 'AT RISK', className: 'badge-danger' };
-    case 'stalled': return { label: 'STALLED', className: 'badge-warning' };
-    case 'healthy': return { label: 'HEALTHY', className: 'badge-success' };
-    default: return { label: riskLevel.toUpperCase(), className: 'badge-muted' };
+/** Formats relative or standard dates */
+export function formatDate(dateString: string | null | undefined): string {
+  if (!dateString) return "Never";
+  try {
+    const d = new Date(dateString);
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return dateString;
   }
 }
 
-export function computeStatusBadge(status: string): { label: string; className: string } {
-  switch (status) {
-    case 'pending_approval': return { label: 'Pending', className: 'badge-warning' };
-    case 'approved': return { label: 'Approved', className: 'badge-success' };
-    case 'rejected': return { label: 'Rejected', className: 'badge-danger' };
-    case 'sent': return { label: 'Sent', className: 'badge-info' };
-    case 'error': return { label: 'Error', className: 'badge-danger' };
-    default: return { label: status, className: 'badge-muted' };
-  }
+export const formatDateTime = formatDate;
+export const formatRelativeTime = formatDate;
+
+export function getAgentColor(agent: string): string {
+  const norm = agent.toLowerCase();
+  if (norm.includes("closer")) return "#3b82f6";
+  if (norm.includes("prospector")) return "#a855f7";
+  if (norm.includes("guardian")) return "#f59e0b";
+  if (norm.includes("spy")) return "#ef4444";
+  return "#71717a";
 }
 
-export function computeChurnCategory(risk: number): 'high' | 'medium' | 'low' {
-  if (risk >= 0.7) return 'high';
-  if (risk >= 0.4) return 'medium';
-  return 'low';
+export function formatTokens(tokens: number | null | undefined): string {
+  if (!tokens) return "0";
+  return tokens.toLocaleString();
 }
 
-export function computeIcpColor(score: number | null): string {
-  if (score === null) return 'var(--text-muted)';
-  if (score > 0.7) return 'var(--success)';
-  if (score > 0.4) return 'var(--warning)';
-  return 'var(--danger)';
+export function formatCost(cost: number | null | undefined): string {
+  if (!cost) return "$0.00";
+  return `$${cost.toFixed(4)}`;
 }
 
-// ── Sparkline Math ──
-export function computeSparklinePath(values: number[], width = 80, height = 24): string {
-  if (!values || values.length < 2) return '';
-  const max = Math.max(...values);
-  const min = Math.min(...values);
-  const range = max - min || 1;
-  const dx = width / (values.length - 1);
-
-  return values
-    .map((v, i) => {
-      const x = i * dx;
-      const y = height - ((v - min) / range) * height;
-      return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-    })
-    .join(' ');
+export function formatTaskType(taskType: string): string {
+  return taskType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function computeTrendDirection(values: number[]): 'up' | 'down' | 'flat' {
-  if (!values || values.length < 2) return 'flat';
-  const first = values[0];
-  const last = values[values.length - 1];
-  if (last > first * 1.02) return 'up';
-  if (last < first * 0.98) return 'down';
-  return 'flat';
+export function getAgentBadgeClass(agent: string): string {
+  const norm = agent.toLowerCase();
+  if (norm.includes("closer")) return "text-blue-400 bg-blue-500/10 border-blue-500/20";
+  if (norm.includes("prospector")) return "text-purple-400 bg-purple-500/10 border-purple-500/20";
+  if (norm.includes("guardian")) return "text-amber-400 bg-amber-500/10 border-amber-500/20";
+  if (norm.includes("spy")) return "text-red-400 bg-red-500/10 border-red-500/20";
+  return "text-zinc-400 bg-zinc-800 border-zinc-700";
 }
 
-export function computeTrendPercentage(values: number[]): number {
-  if (!values || values.length < 2 || values[0] === 0) return 0;
-  return Number(((values[values.length - 1] - values[0]) / values[0] * 100).toFixed(1));
+export function getAgentIcon(agent: string): string {
+  const norm = agent.toLowerCase();
+  if (norm.includes("closer")) return "Closer";
+  if (norm.includes("prospector")) return "Prospector";
+  if (norm.includes("guardian")) return "Guardian";
+  if (norm.includes("spy")) return "Spy";
+  return "Agent";
 }
 
-// ── Agent Helpers ──
-export function getAgentColor(agentName: string): string {
-  switch (agentName?.toLowerCase()) {
-    case 'closer': return 'var(--closer)';
-    case 'prospector': return 'var(--prospector)';
-    case 'guardian': return 'var(--guardian)';
-    case 'spy': return 'var(--spy)';
-    default: return 'var(--text-muted)';
-  }
+export function getRiskBadgeClass(risk: string): string {
+  const norm = risk.toLowerCase();
+  if (norm === "healthy") return "text-[#0ca30c] bg-[rgba(12,163,12,0.12)] border-[rgba(12,163,12,0.25)]";
+  if (norm === "at_risk") return "text-[#fab219] bg-[rgba(250,178,25,0.12)] border-[rgba(250,178,25,0.25)]";
+  if (norm === "stalled") return "text-[#ec835a] bg-[rgba(236,131,90,0.12)] border-[rgba(236,131,90,0.25)]";
+  return "text-zinc-400 bg-zinc-800 border-zinc-700";
 }
 
-export function getAgentBadgeClass(agentName: string): string {
-  switch (agentName?.toLowerCase()) {
-    case 'closer': return 'badge-closer';
-    case 'prospector': return 'badge-prospector';
-    case 'guardian': return 'badge-guardian';
-    case 'spy': return 'badge-spy';
-    default: return 'badge-muted';
-  }
+export function getStageBadgeClass(stage: string): string {
+  return "text-zinc-300 bg-zinc-800 border-zinc-700";
 }
 
-export function getAgentIcon(agentName: string): string {
-  switch (agentName?.toLowerCase()) {
-    case 'closer': return '🎯';
-    case 'prospector': return '🔍';
-    case 'guardian': return '🛡️';
-    case 'spy': return '🕵️';
-    default: return '🤖';
-  }
-}
-
-// ── Percentage ──
-export function formatPercent(value: number, decimals = 0): string {
-  return `${(value * 100).toFixed(decimals)}%`;
-}
-
-// ── Gauge Arc Math ──
-export function computeGaugeArc(score: number, radius = 20): { circumference: number; offset: number } {
+export function computeGaugeArc(score: number, radius: number) {
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score * circumference);
+  const offset = circumference - Math.min(Math.max(score, 0), 1) * circumference;
   return { circumference, offset };
 }
 
-// ── Task Type Formatting ──
-export function formatTaskType(taskType: string): string {
-  return taskType
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
+export function computeHealthColor(score: number): string {
+  if (score >= 0.7) return "#0ca30c";
+  if (score >= 0.4) return "#fab219";
+  return "#d03b3b";
 }
 
-// ── Stage Formatting ──
-export function formatStage(stage: string): string {
-  return stage
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
+export function computeSparklinePath(values: number[], width: number, height: number): string {
+  if (values.length < 2) return "";
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const step = width / (values.length - 1);
+
+  return values
+    .map((v, i) => {
+      const x = i * step;
+      const y = height - ((v - min) / range) * (height - 4) - 2;
+      return `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join(" ");
 }
 
-// ── Cost Formatting ──
-export function formatCost(cost: number): string {
-  if (cost < 0.01) return `$${cost.toFixed(4)}`;
-  return `$${cost.toFixed(2)}`;
+export function computeTrendDirection(values: number[]): "up" | "down" | "flat" {
+  if (values.length < 2) return "flat";
+  const diff = values[values.length - 1] - values[0];
+  if (diff > 0.01) return "up";
+  if (diff < -0.01) return "down";
+  return "flat";
 }
 
-// ── Token Formatting ──
-export function formatTokens(tokens: number): string {
-  if (tokens >= 1000) return `${(tokens / 1000).toFixed(1)}K`;
-  return tokens.toString();
+/** Last 8 hex chars of a UUID — used in URLs so /dashboard/pipeline/00000011 reads
+ * clean instead of the full 20000000-0000-0000-0000-000000000011. Uses the *last*
+ * segment, not the first, because this dataset's seed UUIDs all share the same
+ * leading "20000000-0000-0000-0000-" prefix — only the tail actually varies.
+ * The backend resolves this suffix back to the full row. */
+export function shortId(id: string): string {
+  return id.slice(-8);
 }

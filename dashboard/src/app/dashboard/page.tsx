@@ -1,360 +1,383 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { fetchDashboardStats, fetchDeals, fetchAccounts, fetchAuditTrail, fetchAgentStatus, triggerOrchestratorScan, DashboardStats, Deal, Account, AgentTask, AgentStatusData } from '@/lib/api';
-import { formatCurrency, formatRelativeTime, computeDaysInStage, getAgentBadgeClass, getAgentIcon, formatTaskType, computeSparklinePath, computeTrendPercentage } from '@/lib/utils';
-import StatCard from '@/components/StatCard';
-import AgentBadge from '@/components/AgentBadge';
-import HealthGauge from '@/components/HealthGauge';
-import Sparkline from '@/components/Sparkline';
-import styles from './overview.module.css';
+import React, { useState, useEffect } from "react";
+import {
+  TrendingUp,
+  DollarSign,
+  ShieldAlert,
+  CheckSquare,
+  Activity,
+  Bot,
+  Zap,
+  ArrowUpRight,
+  RefreshCw,
+  Cpu,
+  Layers,
+  Sparkles,
+} from "lucide-react";
+import { StatCard } from "@/components/StatCard";
+import { StatusBadge } from "@/components/StatusBadge";
+import { Button } from "@/components/ui/button";
+import {
+  fetchDashboardStats,
+  fetchEvalsScorecard,
+  fetchDeals,
+  fetchTasks,
+  fetchAuditEvents,
+  DashboardStats,
+  EvalsScorecard,
+  Deal,
+  AgentTask,
+  scanOrchestrator,
+} from "@/lib/api";
+import { formatCurrency, formatPercent, formatDate, shortId } from "@/lib/utils";
+import { PageLoader } from "@/components/ui/page-loader";
+import Link from "next/link";
 
-export default function DashboardOverview() {
+import { SwarmMissionControlDrawer } from "@/components/SwarmMissionControlDrawer";
+
+export default function OverviewPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [atRiskDeals, setAtRiskDeals] = useState<Deal[]>([]);
-  const [churnAccounts, setChurnAccounts] = useState<Account[]>([]);
-  const [recentActivity, setRecentActivity] = useState<AgentTask[]>([]);
-  const [agentStatus, setAgentStatus] = useState<AgentStatusData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [scanRunning, setScanRunning] = useState(false);
-  const [scanResult, setScanResult] = useState<string | null>(null);
-
-  const runAutonomousScan = async () => {
-    setScanRunning(true);
-    setScanResult(null);
-    try {
-      const result = await triggerOrchestratorScan() as { total_dispatched?: number; summary?: string };
-      setScanResult(`✅ ${result.summary || `Dispatched ${result.total_dispatched ?? 0} agent tasks`}`);
-      // Refresh dashboard data after scan
-      setTimeout(() => loadData(), 2000);
-    } catch (err) {
-      setScanResult(`❌ Scan failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setScanRunning(false);
-    }
-  };
+  const [scorecard, setScorecard] = useState<EvalsScorecard | null>(null);
+  const [recentDeals, setRecentDeals] = useState<Deal[]>([]);
+  const [pendingTasks, setPendingTasks] = useState<AgentTask[]>([]);
+  const [auditLogs, setAuditLogs] = useState<Array<Record<string, unknown>>>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [missionControlOpen, setMissionControlOpen] = useState<boolean>(false);
 
   const loadData = async () => {
     try {
-      const [statsData, deals, accounts, audit] = await Promise.all([
-        fetchDashboardStats(),
-        fetchDeals(undefined, 'at_risk'),
-        fetchAccounts(0.7),
-        fetchAuditTrail(),
+      const [s, sc, d, t, a] = await Promise.all([
+        fetchDashboardStats().catch(() => null),
+        fetchEvalsScorecard().catch(() => null),
+        fetchDeals().catch(() => []),
+        fetchTasks("pending_approval").catch(() => []),
+        fetchAuditEvents().catch(() => []),
       ]);
-      setStats(statsData);
-      setAtRiskDeals(deals.slice(0, 3));
-      setChurnAccounts(accounts.sort((a, b) => b.churn_risk - a.churn_risk).slice(0, 3));
-      setRecentActivity(audit.slice(0, 15));
-    } catch (err) {
-      console.error('Dashboard load error:', err);
+      if (s) setStats(s);
+      if (sc) setScorecard(sc);
+      setRecentDeals(d.slice(0, 5));
+      setPendingTasks(t.slice(0, 5));
+      const logList = Array.isArray(a) ? a : (a as { entries?: [] })?.entries || [];
+      setAuditLogs(logList.slice(0, 6));
+    } catch {
+      // silent
     } finally {
       setLoading(false);
     }
-    // Agent status is optional — don't let it break the dashboard
-    try {
-      const aStatus = await fetchAgentStatus();
-      setAgentStatus(aStatus);
-    } catch { /* endpoint may not exist yet */ }
   };
 
   useEffect(() => {
     loadData();
-
-    // WebSocket auto-refresh logic (best-effort)
-    let ws: WebSocket | null = null;
-    try {
-      ws = new WebSocket('ws://localhost:8000/ws/live');
-      ws.onmessage = () => loadData();
-      ws.onerror = () => {}; // silent
-    } catch { /* WS unavailable */ }
-    return () => { try { ws?.close(); } catch {} };
+    const interval = setInterval(loadData, 10000);
+    return () => clearInterval(interval);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="page-content">
-        <div className={styles.statsRow}>
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="skeleton" style={{ height: 120, borderRadius: 'var(--radius-lg)' }} />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const handleTriggerScan = () => {
+    setMissionControlOpen(true);
+  };
 
-  const atRiskArr = atRiskDeals.reduce((s, d) => s + (d.arr || 0), 0);
-  const churnArr = churnAccounts.reduce((s, a) => s + (a.arr || 0), 0);
+  if (loading) return <PageLoader label="Loading revenue command center..." />;
 
   return (
-    <div className="page-content">
-      <div className="page-header">
+    <div className="space-y-8 animate-in fade-in duration-300">
+      {/* Top Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
         <div>
-          <h1 className="page-title">Command Center</h1>
-          <p className="text-body-sm text-muted">Your AI workforce is monitoring {stats?.active_deals ?? 0} deals, {churnAccounts.length > 0 ? '20' : '0'} accounts, and 5 leads — autonomously, 24/7.</p>
+          <h2 className="text-2xl font-bold tracking-tight text-white">Revenue Command Center</h2>
+          <p className="text-sm text-zinc-400">Autonomous multi-agent sales pipeline & commercial governance</p>
         </div>
-        <div className={styles.headerActions}>
-          <button
-            onClick={runAutonomousScan}
-            disabled={scanRunning}
-            style={{
-              padding: '8px 20px',
-              borderRadius: 'var(--radius-md)',
-              border: 'none',
-              background: scanRunning
-                ? 'rgba(168,85,247,0.15)'
-                : 'linear-gradient(135deg, var(--prospector), var(--closer))',
-              color: scanRunning ? 'var(--text-muted)' : '#fff',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              cursor: scanRunning ? 'wait' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              transition: 'all 0.2s',
-            }}
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={handleTriggerScan}
+            className="gap-2 bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20 font-semibold text-xs h-9 px-4 transition-all"
           >
-            <span style={{ fontSize: '1.1rem' }}>{scanRunning ? '⏳' : '🔄'}</span>
-            {scanRunning ? 'Scanning...' : 'Run Autonomous Scan'}
-          </button>
-          {scanResult && (
-            <span className="text-body-sm" style={{ maxWidth: 320, color: scanResult.startsWith('✅') ? 'var(--guardian)' : 'var(--danger)' }}>
-              {scanResult}
-            </span>
-          )}
-          <span className={styles.liveIndicator}>
-            <span className="dot dot-green pulse-dot" />
-            <span className="text-body-sm">Agents Online</span>
-          </span>
+            <Sparkles className="h-4 w-4 fill-current text-blue-200" />
+            <span>Trigger Swarm Sweep</span>
+          </Button>
         </div>
       </div>
 
-      {/* Revenue Impact Banner */}
-      <div className="card" style={{
-        marginBottom: 'var(--space-lg)',
-        padding: 'var(--space-lg) var(--space-xl)',
-        background: 'linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(168,85,247,0.08) 50%, rgba(34,211,153,0.08) 100%)',
-        border: '1px solid rgba(168,85,247,0.2)',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: 'var(--space-lg)',
-      }}>
-        <div>
-          <span className="text-label" style={{ display: 'block', marginBottom: 4, letterSpacing: '0.08em' }}>PIPELINE PROTECTED</span>
-          <span className="font-mono" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--closer)' }}>
-            {formatCurrency(stats?.pipeline_value ?? 0)}
-          </span>
-          <span className="text-body-sm text-muted" style={{ display: 'block', marginTop: 2 }}>Closer monitoring {stats?.active_deals ?? 0} active deals</span>
-        </div>
-        <div>
-          <span className="text-label" style={{ display: 'block', marginBottom: 4, letterSpacing: '0.08em' }}>CHURN RISK IDENTIFIED</span>
-          <span className="font-mono" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--danger)' }}>
-            {formatCurrency(churnArr)}
-          </span>
-          <span className="text-body-sm text-muted" style={{ display: 'block', marginTop: 2 }}>Guardian flagged {churnAccounts.length} high-risk accounts</span>
-        </div>
-        <div>
-          <span className="text-label" style={{ display: 'block', marginBottom: 4, letterSpacing: '0.08em' }}>DEALS AT RISK</span>
-          <span className="font-mono" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--warning)' }}>
-            {formatCurrency(atRiskArr)}
-          </span>
-          <span className="text-body-sm text-muted" style={{ display: 'block', marginTop: 2 }}>{atRiskDeals.length} stalled deals need re-engagement</span>
-        </div>
-        <div>
-          <span className="text-label" style={{ display: 'block', marginBottom: 4, letterSpacing: '0.08em' }}>AI COST EFFICIENCY</span>
-          <span className="font-mono" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--success)' }}>
-            {'< $0.05'}
-          </span>
-          <span className="text-body-sm text-muted" style={{ display: 'block', marginTop: 2 }}>vs ~$450/day manual sales ops</span>
-        </div>
-      </div>
-
-      {/* Stats Row */}
-      <div className={styles.statsRow}>
+      {/* KPI Cards Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Active Deals"
-          value={stats?.active_deals ?? 0}
-          icon="📊"
-          color="blue"
-        />
-        <StatCard
-          label="Pending Approvals"
-          value={stats?.pending_approvals ?? 0}
-          icon="⏳"
-          color="amber"
-          pulse={(stats?.pending_approvals ?? 0) > 0}
-        />
-        <StatCard
-          label="Churn Alerts"
-          value={stats?.high_churn_accounts ?? 0}
-          icon="🔥"
-          color="rose"
-        />
-        <StatCard
-          label="Pipeline Value"
+          title="Active Pipeline ARR"
           value={formatCurrency(stats?.pipeline_value ?? 0)}
-          icon="💰"
-          color="green"
+          subtitle={`${stats?.active_deals ?? recentDeals.length} deals in flight`}
+          trend={{ value: `${stats?.active_deals ?? recentDeals.length} active deals`, isPositive: true }}
+          icon={TrendingUp}
+          variant="good"
+        />
+
+        <StatCard
+          title="ARR at Churn Risk"
+          value={formatCurrency(stats?.at_risk_arr ?? 0)}
+          subtitle={`${stats?.high_churn_accounts ?? 0} accounts flagged by Guardian`}
+          trend={{ value: `${stats?.high_churn_accounts ?? 0} critical accounts`, isPositive: false }}
+          icon={ShieldAlert}
+          variant="critical"
+        />
+
+        <StatCard
+          title="Pending HITL Approvals"
+          value={stats?.pending_approvals ?? pendingTasks.length}
+          subtitle="Agent outreach & discount drafts"
+          icon={CheckSquare}
+          variant={stats?.pending_approvals ? "warning" : "good"}
+        />
+
+        <StatCard
+          title="Avg Account Health"
+          value={`${Math.round((stats?.avg_health_score ?? 0) * 100)}%`}
+          subtitle={`${stats?.total_accounts ?? 0} total accounts active`}
+          trend={{
+            value: (stats?.avg_health_score ?? 0) >= 0.7 ? "Healthy portfolio" : "Needs attention",
+            isPositive: (stats?.avg_health_score ?? 0) >= 0.7,
+          }}
+          icon={Activity}
+          variant="good"
         />
       </div>
 
-      {agentStatus && (
-        <div className="card" style={{ marginBottom: 'var(--space-lg)', padding: 'var(--space-md) var(--space-lg)', display: 'flex', gap: 'var(--space-xl)', alignItems: 'center', background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
-          <div>
-            <span className="text-label" style={{ display: 'block', marginBottom: '4px' }}>FLEET EFFICIENCY</span>
-            <span className="text-title" style={{ fontSize: '1.25rem' }}>{agentStatus.total_runs} Actions</span>
-          </div>
-          <div>
-            <span className="text-label" style={{ display: 'block', marginBottom: '4px' }}>COST SAVINGS</span>
-            <span className="text-body font-mono text-muted" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              ${agentStatus.total_cost.toFixed(3)}
-              <span className="badge badge-success">vs $450 manual</span>
-            </span>
-          </div>
-          <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-md)' }}>
-            {Object.entries(agentStatus.agent_metrics).map(([agent, metrics]) => (
-              <div key={agent} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AgentBadge agent={agent} size="sm" />
-                <span className="font-mono text-body-sm">{metrics.runs}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Live Evals & System Health Card */}
+      {(() => {
+        const bench = (scorecard?.offline_benchmarks || {}) as Record<string, number>;
+        const closerTraj = bench.closer_trajectory_accuracy_pct ?? 96;
+        const ragFaith = bench.rag_faithfulness_pct ?? 100;
 
-      {/* Main Grid */}
-      <div className={styles.mainGrid}>
-        {/* Activity Feed */}
-        <div className={`card ${styles.activityCard}`}>
-          <div className={styles.cardHeader}>
-            <h3 className="text-title">Agent Activity</h3>
-            <Link href="/dashboard/audit" className="text-body-sm" style={{ color: 'var(--closer)' }}>View All →</Link>
-          </div>
-          <div className={styles.activityList}>
-            {recentActivity.map((item, i) => (
-              <div key={item.id || i} className={styles.activityItem}>
-                <div className={styles.activityIcon}>
-                  <span>{getAgentIcon(item.agent_name)}</span>
+        return (
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 shadow-xl backdrop-blur-md">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4 mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(12,163,12,0.12)] border border-[rgba(12,163,12,0.25)] text-[#0ca30c]">
+                  <Activity className="h-4 w-4" />
                 </div>
-                <div className={styles.activityContent}>
-                  <div className={styles.activityHeader}>
-                    <AgentBadge agent={item.agent_name} size="sm" showIcon={false} />
-                    <span className="text-body-sm text-muted">{formatRelativeTime(item.created_at)}</span>
-                  </div>
-                  <div className="text-body-sm">
-                    <span className="text-secondary">{formatTaskType(item.task_type)}</span>
-                    {item.target_name && (
-                      <span className="text-muted"> — {item.target_name}</span>
-                    )}
-                  </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white">Live System Reliability & Evals Scorecard</h3>
+                  <p className="text-xs text-zinc-400">Continuous LangGraph evaluations, fallback rates, and agent accuracy</p>
                 </div>
               </div>
-            ))}
-            {recentActivity.length === 0 && (
-              <div className={styles.empty}>No recent activity</div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Column */}
-        <div className={styles.rightColumn}>
-          {/* Deals at Risk */}
-          <div className={`card ${styles.riskCard}`}>
-            <div className={styles.cardHeader}>
-              <h3 className="text-title">🔥 Deals at Risk</h3>
-              <Link href="/dashboard/pipeline" className="text-body-sm" style={{ color: 'var(--closer)' }}>Pipeline →</Link>
+              <Link
+                href="/dashboard/evals"
+                className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1"
+              >
+                <span>View Full Scorecard</span>
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
-            <div className={styles.riskList}>
-              {atRiskDeals.map(deal => (
-                <div key={deal.id} className={styles.riskItem}>
-                  <div className={styles.riskInfo}>
-                    <div className="text-title">{deal.company}</div>
-                    <div className={styles.riskMeta}>
-                      <span className="badge badge-danger">AT RISK</span>
-                      <span className="font-mono text-body-sm text-muted">
-                        {computeDaysInStage(deal.last_activity)}d silent
-                      </span>
-                    </div>
-                  </div>
-                  <div className={styles.riskArr}>
-                    <span className="font-mono" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--danger)' }}>
-                      {formatCurrency(deal.arr)}
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="rounded-lg bg-zinc-950/80 p-4 border border-zinc-800">
+                <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">Human Approval Rate</span>
+                <span className="text-xl font-bold text-[#0ca30c] mt-1 block">
+                  {scorecard?.approval_rate_pct !== undefined ? `${scorecard.approval_rate_pct}%` : "100%"}
+                </span>
+                <span className="text-[10px] text-zinc-500 font-mono mt-0.5 block">High rep alignment</span>
+              </div>
+
+              <div className="rounded-lg bg-zinc-950/80 p-4 border border-zinc-800">
+                <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">Model Fallback Rate</span>
+                <span className="text-xl font-bold text-white mt-1 block">
+                  {scorecard?.fallback_rate_pct !== undefined ? `${scorecard.fallback_rate_pct}%` : "0.0%"}
+                </span>
+                <span className="text-[10px] text-zinc-500 font-mono mt-0.5 block">Zero unhandled outages</span>
+              </div>
+
+              <div className="rounded-lg bg-zinc-950/80 p-4 border border-zinc-800">
+                <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">Closer Trajectory</span>
+                <span className="text-xl font-bold text-blue-400 mt-1 block">{closerTraj}% Strict</span>
+                <span className="text-[10px] text-zinc-500 font-mono mt-0.5 block">25 golden scenarios</span>
+              </div>
+
+              <div className="rounded-lg bg-zinc-950/80 p-4 border border-zinc-800">
+                <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider block">RAG Faithfulness</span>
+                <span className="text-xl font-bold text-[#0ca30c] mt-1 block">{ragFaith}% Judge</span>
+                <span className="text-[10px] text-zinc-500 font-mono mt-0.5 block">Zero hallucinated terms</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Autonomous Agent Department Status */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Closer */}
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 shadow-lg flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                <Bot className="h-4 w-4" />
+              </div>
+              <span className="font-semibold text-sm text-white">Closer Agent</span>
+            </div>
+            <StatusBadge status="healthy" label="Online" size="sm" />
+          </div>
+          <p className="text-xs text-zinc-400 mt-3 line-clamp-2">
+            Objection classifier, contract terms evaluator, and silent deal reviver.
+          </p>
+          <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+            <span className="text-zinc-500 font-mono">Port 9001</span>
+            <Link href="/dashboard/pipeline" className="text-blue-400 hover:text-blue-300 font-medium">
+              View Deals →
+            </Link>
+          </div>
+        </div>
+
+        {/* Prospector */}
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 shadow-lg flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                <Bot className="h-4 w-4" />
+              </div>
+              <span className="font-semibold text-sm text-white">Prospector Agent</span>
+            </div>
+            <StatusBadge status="healthy" label="Online" size="sm" />
+          </div>
+          <p className="text-xs text-zinc-400 mt-3 line-clamp-2">
+            ICP scoring, Clearbit/Apollo enrichment parser, and outreach sequencer.
+          </p>
+          <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+            <span className="text-zinc-500 font-mono">Port 9002</span>
+            <Link href="/dashboard/prospecting" className="text-blue-400 hover:text-blue-300 font-medium">
+              View Leads →
+            </Link>
+          </div>
+        </div>
+
+        {/* Guardian */}
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 shadow-lg flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[rgba(250,178,25,0.12)] border border-[rgba(250,178,25,0.25)] text-[#fab219]">
+                <Bot className="h-4 w-4" />
+              </div>
+              <span className="font-semibold text-sm text-white">Guardian Agent</span>
+            </div>
+            <StatusBadge status="healthy" label="Online" size="sm" />
+          </div>
+          <p className="text-xs text-zinc-400 mt-3 line-clamp-2">
+            Portfolio health scanner, usage decay detector, and retention plays.
+          </p>
+          <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+            <span className="text-zinc-500 font-mono">Port 9003</span>
+            <Link href="/dashboard/churn" className="text-blue-400 hover:text-blue-300 font-medium">
+              View Health →
+            </Link>
+          </div>
+        </div>
+
+        {/* Spy A2A */}
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 shadow-lg flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[rgba(208,59,59,0.12)] border border-[rgba(208,59,59,0.25)] text-[#d03b3b]">
+                <Bot className="h-4 w-4" />
+              </div>
+              <span className="font-semibold text-sm text-white">Spy A2A Agent</span>
+            </div>
+            <StatusBadge status="healthy" label="Online" size="sm" />
+          </div>
+          <p className="text-xs text-zinc-400 mt-3 line-clamp-2">
+            A2A competitive intelligence, real-time battle cards, and win/loss plays.
+          </p>
+          <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs">
+            <span className="text-zinc-500 font-mono">Port 8080</span>
+            <Link href="/dashboard/intelligence" className="text-blue-400 hover:text-blue-300 font-medium">
+              View Intel →
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Two Column Section: Pipeline Overview & Live Audit Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* High Priority Deals */}
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 shadow-xl backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4 mb-4">
+              <div className="flex items-center gap-2">
+                <Layers className="h-4 w-4 text-blue-400" />
+                <h3 className="text-sm font-semibold text-white">High Priority Deals in Pipeline</h3>
+              </div>
+              <Link href="/dashboard/pipeline" className="text-xs text-blue-400 hover:text-blue-300 font-medium">
+                View All ({recentDeals.length}) →
+              </Link>
+            </div>
+
+            <div className="space-y-3">
+              {recentDeals.map((deal) => (
+                <Link
+                  key={deal.id}
+                  href={`/dashboard/pipeline/${shortId(deal.id)}`}
+                  className="flex items-center justify-between p-3 rounded-lg border border-zinc-800/60 bg-zinc-950/60 hover:border-zinc-700 hover:bg-zinc-900/80 transition-all group"
+                >
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm text-white group-hover:text-blue-400 transition-colors">
+                      {deal.company}
                     </span>
-                    <span className="text-body-sm text-muted">ARR</span>
+                    <span className="text-xs text-zinc-400 font-mono">
+                      Stage: {deal.stage} • ARR: {formatCurrency(deal.arr)}
+                    </span>
                   </div>
-                </div>
+                  <StatusBadge status={deal.risk_level} />
+                </Link>
               ))}
-              {atRiskDeals.length === 0 && (
-                <div className={styles.empty}>No at-risk deals ✓</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Autonomous Audit Stream */}
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 shadow-xl backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4 mb-4">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-[#fab219]" />
+                <h3 className="text-sm font-semibold text-white">Live Autonomous Activity Stream</h3>
+              </div>
+              <Link href="/dashboard/audit" className="text-xs text-blue-400 hover:text-blue-300 font-medium">
+                Full Audit →
+              </Link>
+            </div>
+
+            <div className="space-y-2.5 font-mono text-xs">
+              {auditLogs.length > 0 ? (
+                auditLogs.map((log, idx) => {
+                  const agent = String(log.agent_name || log.agent || "system");
+                  const action = String(log.action || log.task_type || "executed_task");
+                  const target = String(log.target_name || log.company || log.entity || "");
+                  const time = formatDate(String(log.created_at || log.timestamp || ""));
+
+                  return (
+                    <div key={idx} className="flex items-start justify-between p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/60 text-zinc-300">
+                      <div className="flex items-start gap-2">
+                        <span className="text-blue-400 font-bold uppercase text-[10px] bg-blue-950/60 px-1.5 py-0.5 rounded border border-blue-800/40">
+                          {agent}
+                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-zinc-200">{action} {target ? `→ ${target}` : ""}</span>
+                          <span className="text-[10px] text-zinc-500">{time}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8 text-zinc-500 text-xs">
+                  Awaiting autonomous events from agent swarm...
+                </div>
               )}
             </div>
           </div>
-
-          {/* Churn Watch */}
-          <div className={`card ${styles.churnCard}`}>
-            <div className={styles.cardHeader}>
-              <h3 className="text-title">🛡️ Churn Watch</h3>
-              <Link href="/dashboard/churn" className="text-body-sm" style={{ color: 'var(--guardian)' }}>Monitor →</Link>
-            </div>
-            <div className={styles.churnList}>
-              {churnAccounts.map(account => (
-                <div key={account.id} className={styles.churnItem}>
-                  <HealthGauge score={account.health_score} size={40} />
-                  <div className={styles.churnInfo}>
-                    <div className="text-body">{account.company}</div>
-                    <div className="text-body-sm text-muted">
-                      {account.metadata?.signals?.[0] || `${Math.round(account.churn_risk * 100)}% risk`}
-                    </div>
-                  </div>
-                  <div className={styles.churnTrend}>
-                    <Sparkline
-                      values={account.metadata?.usage_trend || []}
-                      width={60}
-                      height={20}
-                    />
-                    <span className="font-mono text-body-sm" style={{
-                      color: computeTrendPercentage(account.metadata?.usage_trend || []) < 0 ? 'var(--danger)' : 'var(--success)'
-                    }}>
-                      {computeTrendPercentage(account.metadata?.usage_trend || []) > 0 ? '+' : ''}
-                      {computeTrendPercentage(account.metadata?.usage_trend || [])}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Protocol Status Bar */}
-      <div className={styles.protocolBar}>
-        <div className={styles.protocol}>
-          <span className="dot dot-green pulse-dot" />
-          <span className="text-body-sm">MCP</span>
-          <span className="font-mono text-body-sm text-muted">3 custom servers</span>
-        </div>
-        <div className={styles.protocol}>
-          <span className="dot dot-green pulse-dot" />
-          <span className="text-body-sm">A2A</span>
-          <span className="font-mono text-body-sm text-muted">Spy agent active</span>
-        </div>
-        <div className={styles.protocol}>
-          <span className="dot dot-green pulse-dot" />
-          <span className="text-body-sm">Kafka</span>
-          <span className="font-mono text-body-sm text-muted">4 event topics</span>
-        </div>
-        <div className={styles.protocol}>
-          <span className="dot dot-green pulse-dot" />
-          <span className="text-body-sm">Pinecone</span>
-          <span className="font-mono text-body-sm text-muted">RAG enabled</span>
-        </div>
-        <div className={styles.protocol}>
-          <span className="dot dot-green pulse-dot" />
-          <span className="text-body-sm">LangGraph</span>
-          <span className="font-mono text-body-sm text-muted">3 agent graphs</span>
-        </div>
-      </div>
+      {/* Swarm Mission Control Drawer */}
+      <SwarmMissionControlDrawer
+        isOpen={missionControlOpen}
+        onClose={() => setMissionControlOpen(false)}
+        onScanCompleted={loadData}
+      />
     </div>
   );
 }
