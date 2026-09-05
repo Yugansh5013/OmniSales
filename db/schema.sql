@@ -20,6 +20,7 @@ CREATE TABLE leads (
     status        TEXT DEFAULT 'new',        -- new|contacted|replied|booked|dead
     source        TEXT DEFAULT 'prospector', -- prospector|manual|inbound
     enrichment    JSONB DEFAULT '{}',        -- raw Apollo/Clearbit data
+    owner         TEXT DEFAULT 'Rep 1',
     created_at    TIMESTAMPTZ DEFAULT NOW(),
     updated_at    TIMESTAMPTZ DEFAULT NOW()
 );
@@ -27,18 +28,24 @@ CREATE TABLE leads (
 -- ── Deals (Closer domain) ──
 
 CREATE TABLE deals (
-    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    org_id         UUID NOT NULL,
-    lead_id        UUID REFERENCES leads(id),
-    company        TEXT,
-    stage          TEXT DEFAULT 'discovery',  -- discovery|proposal|negotiation|closed_won|closed_lost
-    arr            NUMERIC DEFAULT 0,
-    risk_level     TEXT DEFAULT 'healthy',    -- healthy|at_risk|stalled
-    last_activity  TIMESTAMPTZ DEFAULT NOW(),
-    closer_thread  JSONB DEFAULT '[]',        -- email conversation history
-    agent_log      JSONB[] DEFAULT '{}',      -- immutable audit trail
-    created_at     TIMESTAMPTZ DEFAULT NOW(),
-    updated_at     TIMESTAMPTZ DEFAULT NOW()
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    org_id          UUID NOT NULL,
+    lead_id         UUID REFERENCES leads(id),
+    company         TEXT,
+    stage           TEXT DEFAULT 'discovery',  -- discovery|proposal|negotiation|closed_won|closed_lost
+    arr             NUMERIC DEFAULT 0,
+    risk_level      TEXT DEFAULT 'healthy',    -- healthy|at_risk|stalled
+    last_activity   TIMESTAMPTZ DEFAULT NOW(),
+    discount_pct    NUMERIC DEFAULT 0.0,
+    contract_months INT DEFAULT 12,
+    payment_terms   TEXT DEFAULT 'annual_upfront',
+    custom_sla      BOOLEAN DEFAULT false,
+    tier            TEXT DEFAULT 'growth',
+    owner           TEXT DEFAULT 'Rep 1',
+    closer_thread   JSONB DEFAULT '[]',        -- email conversation history
+    agent_log       JSONB[] DEFAULT '{}',      -- immutable audit trail
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ── Accounts (Guardian domain) ──
@@ -55,6 +62,7 @@ CREATE TABLE accounts (
     support_tickets INT DEFAULT 0,
     last_login      TIMESTAMPTZ DEFAULT NOW(),
     stripe_customer TEXT,
+    owner           TEXT DEFAULT 'Rep 1',
     metadata        JSONB DEFAULT '{}',        -- usage trends, signals, etc.
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     updated_at      TIMESTAMPTZ DEFAULT NOW()

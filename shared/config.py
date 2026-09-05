@@ -53,10 +53,24 @@ class Settings(BaseSettings):
     # --- A2A ---
     spy_a2a_url: str = "http://spy-a2a:8080"
 
-    # --- JWT ---
+    # --- JWT & Auth ---
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
     jwt_expiry_minutes: int = 1440
+    admin_password: str = "hackathon2026"
+
+    # --- Resend (Email Dispatch) ---
+    resend_api_key: str = ""
+    resend_from_email: str = "onboarding@resend.dev"
+    demo_notification_email: str = ""
+
+    # --- Razorpay (Commercial Billing) ---
+    razorpay_key_id: str = ""
+    razorpay_key_secret: str = ""
+
+    # --- Gmail / Inbound IMAP ---
+    gmail_imap_user: str = ""
+    gmail_imap_app_password: str = ""
 
     # ── Derived helpers ──
 

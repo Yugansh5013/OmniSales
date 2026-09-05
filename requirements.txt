@@ -37,7 +37,12 @@ pinecone-client>=4.0.0
 pydantic>=2.9.0
 pydantic-settings>=2.5.0
 
+# Eval & Observability
+openevals>=0.2.0
+langsmith>=0.1.0
+
 # Utils
 python-dotenv>=1.0.0
 tenacity>=9.0.0
 orjson>=3.10.0
+
