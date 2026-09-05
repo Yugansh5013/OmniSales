@@ -1,0 +1,227 @@
+{
+  "results": [
+    {
+      "name": "API Gateway /health",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "API Swagger /docs",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "Login valid",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "Login invalid rejected",
+      "pass": true,
+      "detail": "status=401"
+    },
+    {
+      "name": "Leads >=3",
+      "pass": true,
+      "detail": "3 leads"
+    },
+    {
+      "name": "Deals >=4",
+      "pass": true,
+      "detail": "4 deals"
+    },
+    {
+      "name": "Accounts >=3",
+      "pass": true,
+      "detail": "3 accounts"
+    },
+    {
+      "name": "Deal detail API",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "Lead detail API",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "MCP CRM health",
+      "pass": true,
+      "detail": "port 8001 ok (healthy)"
+    },
+    {
+      "name": "MCP Knowledge health",
+      "pass": true,
+      "detail": "port 8003 ok (healthy)"
+    },
+    {
+      "name": "MCP Approvals health",
+      "pass": true,
+      "detail": "port 8004 ok (healthy)"
+    },
+    {
+      "name": "Orchestrator chat",
+      "pass": true,
+      "detail": "keys=['response', 'context_loaded', 'timestamp']"
+    },
+    {
+      "name": "Orchestrator scan",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "Orchestrator history",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "Closer trigger",
+      "pass": true,
+      "detail": "action=no_action, draft=no, steps=2"
+    },
+    {
+      "name": "Prospector trigger",
+      "pass": true,
+      "detail": "icp=1.0, draft=yes, steps=5"
+    },
+    {
+      "name": "Guardian analyze",
+      "pass": true,
+      "detail": "flagged=3, analyzed=3"
+    },
+    {
+      "name": "Tasks/approvals",
+      "pass": true,
+      "detail": "total=6, pending=6"
+    },
+    {
+      "name": "Approve task",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "Audit trail",
+      "pass": true,
+      "detail": "12 entries"
+    },
+    {
+      "name": "Spy A2A /health",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "Spy A2A agent card",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "Gateway A2A proxy agent card",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "Gateway A2A proxy battlecard",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "Spy A2A skill: get_battlecard",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "Spy A2A skill: get_price_history",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "Spy A2A skill: get_winback_strategy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "Spy A2A skill: get_competitor_usage",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "Kafka topics",
+      "pass": true,
+      "detail": "7 topics"
+    },
+    {
+      "name": "Redis ping",
+      "pass": true,
+      "detail": "PONG"
+    },
+    {
+      "name": "Architecture & Scaling Blueprint",
+      "pass": true,
+      "detail": "verified enterprise scaling blueprint (10817 bytes)"
+    },
+    {
+      "name": "Dashboard port 3000",
+      "pass": true,
+      "detail": "accessible"
+    },
+    {
+      "name": "Razorpay Payment Link API & Persistence",
+      "pass": true,
+      "detail": "status=200, url=https://rzp.io/rzp/CrbLK1qH, persisted=True"
+    },
+    {
+      "name": "Resend Live Email Dispatch API",
+      "pass": true,
+      "detail": "status=sent, id=e2227000-4767-4539-a2cd-a5539806ca47, simulated=False"
+    },
+    {
+      "name": "Deal Desk Pre-flight Evaluation",
+      "pass": true,
+      "detail": "status=approved"
+    },
+    {
+      "name": "Deal Desk Gating: Block Violating Deal",
+      "pass": true,
+      "detail": "status_code=422, violations=1"
+    },
+    {
+      "name": "Deal Desk Gating: Manager Override Pass",
+      "pass": true,
+      "detail": "status=200, url=https://rzp.io/rzp/JabP093A"
+    },
+    {
+      "name": "GET /api/dashboard/stats",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "GET /api/competitors",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "GET /api/deals timeline",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "GET /api/evals/scorecard",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "Error Envelope: HTTP 404",
+      "pass": true,
+      "detail": "status=404, error_keys=['code', 'message', 'service', 'status_code']"
+    },
+    {
+      "name": "Error Envelope: HTTP 422",
+      "pass": true,
+      "detail": "status=422, error_keys=['code', 'message', 'details', 'service', 'status_code']"
+    }
+  ],
+  "passed": 44,
+  "failed": 0,
+  "total": 44
+}
