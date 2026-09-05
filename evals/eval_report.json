@@ -1,0 +1,1726 @@
+{
+  "suite_version": "2026.1",
+  "generated_at": "2026-09-04T05:03:01.825602+00:00",
+  "duration_seconds": 33.24,
+  "summary": {
+    "closer_action_accuracy_pct": 84.0,
+    "closer_5x_stability_pct": 96.0,
+    "guardian_tier_accuracy_pct": 75.0,
+    "guardian_trajectory_accuracy_pct": 90.0,
+    "prospector_tier_accuracy_pct": 90.0,
+    "prospector_trajectory_accuracy_pct": 100.0,
+    "rag_faithfulness_pct": 100.0,
+    "rag_context_relevance_pct": 100.0
+  },
+  "closer": {
+    "agent": "closer",
+    "total_scenarios": 25,
+    "repeats_per_scenario": 5,
+    "schema_valid_pct": 100.0,
+    "action_accuracy_pct": 84.0,
+    "risk_accuracy_pct": 80.0,
+    "action_consistency_pct": 96.0,
+    "risk_consistency_pct": 80.0,
+    "scenario_details": [
+      {
+        "scenario_id": "closer_01",
+        "company": "DataCore Systems",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_02",
+        "company": "Apex Logistics",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_03",
+        "company": "FinTech Matrix",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "follow_up",
+          "follow_up",
+          "follow_up",
+          "follow_up",
+          "follow_up"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_04",
+        "company": "CloudScale AI",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "no_action",
+          "no_action",
+          "no_action",
+          "no_action",
+          "no_action"
+        ],
+        "risks_sampled": [
+          "healthy",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_05",
+        "company": "BioHealth Labs",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_06",
+        "company": "SwiftCommerce",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_07",
+        "company": "NextGen Media",
+        "action_consistency": 0.8,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "no_action",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "healthy",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_08",
+        "company": "OmniRetail Group",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_09",
+        "company": "CyberShield Defense",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "follow_up",
+          "follow_up",
+          "follow_up",
+          "follow_up",
+          "follow_up"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_10",
+        "company": "GlobalFleet Tracking",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "follow_up",
+          "follow_up",
+          "follow_up",
+          "follow_up",
+          "follow_up"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_11",
+        "company": "EduLearn Global",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_12",
+        "company": "AutoDrive Systems",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "no_action",
+          "no_action",
+          "no_action",
+          "no_action",
+          "no_action"
+        ],
+        "risks_sampled": [
+          "healthy",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_13",
+        "company": "Zenith Cloud",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_14",
+        "company": "PixelCraft Studios",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_15",
+        "company": "Vanguard Security",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "no_action",
+          "no_action",
+          "no_action",
+          "no_action",
+          "no_action"
+        ],
+        "risks_sampled": [
+          "healthy",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_16",
+        "company": "Optima Health",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "follow_up",
+          "follow_up",
+          "follow_up",
+          "follow_up",
+          "follow_up"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_17",
+        "company": "Hyperion Energy",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_18",
+        "company": "Starlight Gaming",
+        "action_consistency": 0.6,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "no_action",
+          "objection",
+          "no_action",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_19",
+        "company": "Krypton Payments",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_20",
+        "company": "AeroTech Aerospace",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "no_action",
+          "no_action",
+          "no_action",
+          "no_action",
+          "no_action"
+        ],
+        "risks_sampled": [
+          "healthy",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_21",
+        "company": "Nimbus Networks",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_22",
+        "company": "Ironclad Vaults",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "follow_up",
+          "follow_up",
+          "follow_up",
+          "follow_up",
+          "follow_up"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_23",
+        "company": "Pulse Analytics",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "objection",
+          "objection",
+          "objection",
+          "objection",
+          "objection"
+        ],
+        "risks_sampled": [
+          "at_risk",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_24",
+        "company": "TerraFirma AgTech",
+        "action_consistency": 0.6,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "no_action",
+          "objection",
+          "objection",
+          "objection",
+          "no_action"
+        ],
+        "risks_sampled": [
+          "healthy",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      {
+        "scenario_id": "closer_25",
+        "company": "Zenith AI",
+        "action_consistency": 1.0,
+        "risk_consistency": 0.8,
+        "actions_sampled": [
+          "no_action",
+          "no_action",
+          "no_action",
+          "no_action",
+          "no_action"
+        ],
+        "risks_sampled": [
+          "healthy",
+          "",
+          "",
+          "",
+          ""
+        ]
+      }
+    ]
+  },
+  "guardian": {
+    "agent": "guardian",
+    "total_scenarios": 20,
+    "repeats_per_scenario": 5,
+    "tier_accuracy_pct": 75.0,
+    "node_trajectory_accuracy_pct": 90.0,
+    "tier_consistency_pct": 92.0,
+    "mean_score_std_dev": 0.0246,
+    "scenario_details": [
+      {
+        "scenario_id": "guardian_01",
+        "company": "Acme Retailers",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.85,
+          0.85,
+          0.85,
+          0.85,
+          0.85
+        ],
+        "sampled_tiers": [
+          "critical",
+          "critical",
+          "critical",
+          "critical",
+          "critical"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ]
+      },
+      {
+        "scenario_id": "guardian_02",
+        "company": "DataStream Corp",
+        "score_std_dev": 0.0522,
+        "tier_consistency": 0.6,
+        "sampled_scores": [
+          0.78,
+          0.9,
+          0.82,
+          0.78,
+          0.78
+        ],
+        "sampled_tiers": [
+          "high",
+          "critical",
+          "critical",
+          "high",
+          "high"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ]
+      },
+      {
+        "scenario_id": "guardian_03",
+        "company": "Nexus Health",
+        "score_std_dev": 0.0167,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.08,
+          0.08,
+          0.12,
+          0.1,
+          0.1
+        ],
+        "sampled_tiers": [
+          "low",
+          "low",
+          "low",
+          "low",
+          "low"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ]
+      },
+      {
+        "scenario_id": "guardian_04",
+        "company": "CloudMatrix Inc",
+        "score_std_dev": 0.0671,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.4,
+          0.45,
+          0.55,
+          0.45,
+          0.55
+        ],
+        "sampled_tiers": [
+          "medium",
+          "medium",
+          "medium",
+          "medium",
+          "medium"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ]
+      },
+      {
+        "scenario_id": "guardian_05",
+        "company": "SwiftPay Solutions",
+        "score_std_dev": 0.0164,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.15,
+          0.15,
+          0.15,
+          0.12,
+          0.12
+        ],
+        "sampled_tiers": [
+          "low",
+          "low",
+          "low",
+          "low",
+          "low"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ]
+      },
+      {
+        "scenario_id": "guardian_06",
+        "company": "Vanguard Media",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.85,
+          0.85,
+          0.85,
+          0.85,
+          0.85
+        ],
+        "sampled_tiers": [
+          "critical",
+          "critical",
+          "critical",
+          "critical",
+          "critical"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ]
+      },
+      {
+        "scenario_id": "guardian_07",
+        "company": "Beacon Analytics",
+        "score_std_dev": 0.0224,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.1,
+          0.1,
+          0.1,
+          0.15,
+          0.1
+        ],
+        "sampled_tiers": [
+          "low",
+          "low",
+          "low",
+          "low",
+          "low"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ]
+      },
+      {
+        "scenario_id": "guardian_08",
+        "company": "Pulse Robotics",
+        "score_std_dev": 0.0447,
+        "tier_consistency": 0.8,
+        "sampled_scores": [
+          0.35,
+          0.35,
+          0.25,
+          0.35,
+          0.35
+        ],
+        "sampled_tiers": [
+          "medium",
+          "medium",
+          "low",
+          "medium",
+          "medium"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ]
+      },
+      {
+        "scenario_id": "guardian_09",
+        "company": "Apex Dynamics",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.85,
+          0.85,
+          0.85,
+          0.85,
+          0.85
+        ],
+        "sampled_tiers": [
+          "critical",
+          "critical",
+          "critical",
+          "critical",
+          "critical"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ]
+      },
+      {
+        "scenario_id": "guardian_10",
+        "company": "Krypton Labs",
+        "score_std_dev": 0.0224,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.1,
+          0.05,
+          0.05,
+          0.05,
+          0.05
+        ],
+        "sampled_tiers": [
+          "low",
+          "low",
+          "low",
+          "low",
+          "low"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ]
+      },
+      {
+        "scenario_id": "guardian_11",
+        "company": "Titan Steelworks",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.85,
+          0.85,
+          0.85,
+          0.85,
+          0.85
+        ],
+        "sampled_tiers": [
+          "critical",
+          "critical",
+          "critical",
+          "critical",
+          "critical"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ]
+      },
+      {
+        "scenario_id": "guardian_12",
+        "company": "Starlight Studio",
+        "score_std_dev": 0.0134,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.15,
+          0.15,
+          0.15,
+          0.12,
+          0.15
+        ],
+        "sampled_tiers": [
+          "low",
+          "low",
+          "low",
+          "low",
+          "low"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ]
+      },
+      {
+        "scenario_id": "guardian_13",
+        "company": "BioGenic Research",
+        "score_std_dev": 0.0652,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.45,
+          0.4,
+          0.4,
+          0.55,
+          0.4
+        ],
+        "sampled_tiers": [
+          "medium",
+          "medium",
+          "medium",
+          "medium",
+          "medium"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ]
+      },
+      {
+        "scenario_id": "guardian_14",
+        "company": "NextEra Energy",
+        "score_std_dev": 0.0261,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.05,
+          0.1,
+          0.12,
+          0.1,
+          0.1
+        ],
+        "sampled_tiers": [
+          "low",
+          "low",
+          "low",
+          "low",
+          "low"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ]
+      },
+      {
+        "scenario_id": "guardian_15",
+        "company": "Aura Logistics",
+        "score_std_dev": 0.0508,
+        "tier_consistency": 0.6,
+        "sampled_scores": [
+          0.32,
+          0.35,
+          0.35,
+          0.25,
+          0.25
+        ],
+        "sampled_tiers": [
+          "medium",
+          "medium",
+          "medium",
+          "low",
+          "low"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ]
+      },
+      {
+        "scenario_id": "guardian_16",
+        "company": "CyberLock Systems",
+        "score_std_dev": 0.0134,
+        "tier_consistency": 0.6,
+        "sampled_scores": [
+          0.85,
+          0.85,
+          0.85,
+          0.82,
+          0.85
+        ],
+        "sampled_tiers": [
+          "critical",
+          "critical",
+          "high",
+          "high",
+          "critical"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ]
+      },
+      {
+        "scenario_id": "guardian_17",
+        "company": "GlobalTrade Tech",
+        "score_std_dev": 0.023,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.05,
+          0.1,
+          0.08,
+          0.05,
+          0.05
+        ],
+        "sampled_tiers": [
+          "low",
+          "low",
+          "low",
+          "low",
+          "low"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ]
+      },
+      {
+        "scenario_id": "guardian_18",
+        "company": "OmniHealth Diagnostics",
+        "score_std_dev": 0.0224,
+        "tier_consistency": 0.8,
+        "sampled_scores": [
+          0.85,
+          0.8,
+          0.85,
+          0.85,
+          0.85
+        ],
+        "sampled_tiers": [
+          "critical",
+          "high",
+          "critical",
+          "critical",
+          "critical"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ]
+      },
+      {
+        "scenario_id": "guardian_19",
+        "company": "Quantum Ventures",
+        "score_std_dev": 0.0354,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.05,
+          0.1,
+          0.15,
+          0.1,
+          0.1
+        ],
+        "sampled_tiers": [
+          "low",
+          "low",
+          "low",
+          "low",
+          "low"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag"
+        ]
+      },
+      {
+        "scenario_id": "guardian_20",
+        "company": "HyperDrive Networks",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.85,
+          0.85,
+          0.85,
+          0.85,
+          0.85
+        ],
+        "sampled_tiers": [
+          "critical",
+          "critical",
+          "critical",
+          "critical",
+          "critical"
+        ],
+        "actual_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ],
+        "expected_trajectory": [
+          "analyze_accounts",
+          "score_churn",
+          "rank_and_flag",
+          "generate_retention"
+        ]
+      }
+    ]
+  },
+  "prospector": {
+    "agent": "prospector",
+    "total_scenarios": 20,
+    "repeats_per_scenario": 1,
+    "tier_accuracy_pct": 90.0,
+    "trajectory_accuracy_pct": 100.0,
+    "tier_consistency_pct": 100.0,
+    "mean_score_std_dev": 0.0,
+    "scenario_details": [
+      {
+        "scenario_id": "prospector_01",
+        "company": "CloudTech Enterprises",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.95
+        ],
+        "sampled_tiers": [
+          "A"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_02",
+        "company": "DataSync Analytics",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.78
+        ],
+        "sampled_tiers": [
+          "B"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_03",
+        "company": "Local Bakery Supplies",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.0
+        ],
+        "sampled_tiers": [
+          "D"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_04",
+        "company": "FinFlow Payments",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.92
+        ],
+        "sampled_tiers": [
+          "A"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_05",
+        "company": "NextGen Digital Agency",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.45
+        ],
+        "sampled_tiers": [
+          "C"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_06",
+        "company": "CyberArmor Security",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.92
+        ],
+        "sampled_tiers": [
+          "A"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_07",
+        "company": "AutoParts Direct",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.0
+        ],
+        "sampled_tiers": [
+          "D"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_08",
+        "company": "Apex Logistics SaaS",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.75
+        ],
+        "sampled_tiers": [
+          "B"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_09",
+        "company": "BioMed Clinical",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.92
+        ],
+        "sampled_tiers": [
+          "A"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_10",
+        "company": "Downtown Coffee Roasters",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.05
+        ],
+        "sampled_tiers": [
+          "D"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_11",
+        "company": "Vanguard DevOps",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.92
+        ],
+        "sampled_tiers": [
+          "A"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_12",
+        "company": "Sunrise Solar Installers",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.45
+        ],
+        "sampled_tiers": [
+          "C"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_13",
+        "company": "Krypton AI Systems",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.92
+        ],
+        "sampled_tiers": [
+          "A"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_14",
+        "company": "Citywide Plumbing",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.05
+        ],
+        "sampled_tiers": [
+          "D"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_15",
+        "company": "OmniChannel Retail AI",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.92
+        ],
+        "sampled_tiers": [
+          "A"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_16",
+        "company": "Starlight Legal Tech",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.92
+        ],
+        "sampled_tiers": [
+          "A"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_17",
+        "company": "Golden Gate Yoga",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.05
+        ],
+        "sampled_tiers": [
+          "D"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_18",
+        "company": "Hyperion Cloud Monitoring",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.92
+        ],
+        "sampled_tiers": [
+          "A"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_19",
+        "company": "GreenField Landscape",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.1
+        ],
+        "sampled_tiers": [
+          "D"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp"
+        ],
+        "trajectory_match": true
+      },
+      {
+        "scenario_id": "prospector_20",
+        "company": "Pulse HR Software",
+        "score_std_dev": 0.0,
+        "tier_consistency": 1.0,
+        "sampled_scores": [
+          0.75
+        ],
+        "sampled_tiers": [
+          "B"
+        ],
+        "actual_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "expected_trajectory": [
+          "research_company",
+          "enrich_lead",
+          "score_icp",
+          "identify_contacts",
+          "draft_sequences"
+        ],
+        "trajectory_match": true
+      }
+    ]
+  },
+  "rag": {
+    "faithfulness_accuracy_pct": 100.0,
+    "context_relevance_accuracy_pct": 100.0,
+    "faithfulness_cases": [
+      {
+        "name": "Faithful Competitor Objection Draft",
+        "context": "AcmeCRM charges $45/user/month with no SLA and lacks native multi-agent AI orchestration. OmniSales offers full autonomous revenue department.",
+        "draft": "While AcmeCRM is priced at $45/user/mo, it lacks multi-agent AI orchestration and SLAs, whereas OmniSales provides an autonomous revenue department.",
+        "is_faithful_ground_truth": true,
+        "judge_score": 1.0
+      },
+      {
+        "name": "Faithful Follow-Up Draft",
+        "context": "Prospect CloudScale AI has ARR of $120k, legal approved MSA yesterday.",
+        "draft": "Following up with CloudScale AI regarding the signed MSA approved yesterday for your $120k ARR subscription.",
+        "is_faithful_ground_truth": true,
+        "judge_score": 1.0
+      },
+      {
+        "name": "Hallucinated / Unfaithful Draft",
+        "context": "OmniSales standard enterprise SLA is 99.9% uptime with 1-hour response times.",
+        "draft": "We guarantee 100% uptime with 30-second response times and a free trip to Hawaii with every enterprise license.",
+        "is_faithful_ground_truth": false,
+        "judge_score": 0.0
+      }
+    ],
+    "relevance_cases": [
+      {
+        "name": "Relevant Battle Card Retrieval",
+        "query": "How do we win against AcmeCRM pricing objections?",
+        "retrieved_context": "AcmeCRM Battle Card: Price: $45/user/mo. Strengths: Simple UI. Weaknesses: No autonomous agents, weak reporting, hidden add-on costs. Win Strategy: Highlight 4-agent autonomous pipeline and lower total cost of ownership.",
+        "is_relevant_ground_truth": true,
+        "judge_score": 1.0
+      },
+      {
+        "name": "Relevant Retention Knowledge",
+        "query": "What is the recommended retention playbook for low seat utilization?",
+        "retrieved_context": "Retention Playbook: When usage drops below 30%, trigger CS executive check-in, offer free team retraining, and extend a 15% annual renewal concession if multi-year commitment is secured.",
+        "is_relevant_ground_truth": true,
+        "judge_score": 1.0
+      },
+      {
+        "name": "Irrelevant Retrieved Context",
+        "query": "How do we respond to Salesforce CRM displacement objection?",
+        "retrieved_context": "Office kitchen policy: Coffee beans are refilled every Monday morning. Please clean up the breakroom after lunch.",
+        "is_relevant_ground_truth": false,
+        "judge_score": 0.0
+      }
+    ]
+  },
+  "repeats_per_scenario": 1
+}

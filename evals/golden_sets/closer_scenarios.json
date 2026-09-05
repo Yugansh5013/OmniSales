@@ -1,0 +1,342 @@
+[
+  {
+    "id": "closer_01",
+    "company": "DataCore Systems",
+    "stage": "negotiation",
+    "arr": 48000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Hi Mark, following up on our proposal sent last Tuesday.", "timestamp": "2026-08-10T10:00:00Z"},
+      {"sender": "prospect", "message": "We really like the platform, but AcmeCRM quoted us 30% less for their annual license.", "timestamp": "2026-08-10T14:00:00Z"}
+    ],
+    "prospect_message": "We really like the platform, but AcmeCRM quoted us 30% less for their annual license.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": "AcmeCRM",
+    "expected_reasoning_keywords": ["competitor", "acmecrm", "price", "discount", "objection"]
+  },
+  {
+    "id": "closer_02",
+    "company": "Apex Logistics",
+    "stage": "discovery",
+    "arr": 32000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Thanks for attending our demo yesterday.", "timestamp": "2026-08-15T14:00:00Z"},
+      {"sender": "prospect", "message": "Our security team requires SOC2 Type II before we can evaluate further.", "timestamp": "2026-08-16T09:00:00Z"}
+    ],
+    "prospect_message": "Our security team requires SOC2 Type II before we can evaluate further.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["security", "soc2", "compliance", "objection"]
+  },
+  {
+    "id": "closer_03",
+    "company": "FinTech Matrix",
+    "stage": "proposal",
+    "arr": 75000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Checking in on the contract review.", "timestamp": "2026-08-01T09:00:00Z"},
+      {"sender": "rep", "message": "Hi Sarah, any updates from legal?", "timestamp": "2026-08-08T10:00:00Z"},
+      {"sender": "rep", "message": "Following up once more on timeline.", "timestamp": "2026-08-18T11:00:00Z"}
+    ],
+    "prospect_message": "",
+    "expected_risk_level": "stalled",
+    "expected_action": "follow_up",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["stalled", "no response", "follow up", "ghosting", "re-engage"]
+  },
+  {
+    "id": "closer_04",
+    "company": "CloudScale AI",
+    "stage": "negotiation",
+    "arr": 120000.0,
+    "closer_thread": [
+      {"sender": "prospect", "message": "Everything looks great. Legal just approved the Redlines. Sending signed MSA today.", "timestamp": "2026-08-25T16:00:00Z"}
+    ],
+    "prospect_message": "Legal just approved the Redlines. Sending signed MSA today.",
+    "expected_risk_level": "healthy",
+    "expected_action": "no_action",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["healthy", "signed", "closing", "no action", "won"]
+  },
+  {
+    "id": "closer_05",
+    "company": "BioHealth Labs",
+    "stage": "proposal",
+    "arr": 55000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Here is our enterprise pricing sheet.", "timestamp": "2026-08-12T10:00:00Z"}
+    ],
+    "prospect_message": "We have currently deployed PipeDrive and our team is already trained on it.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": "PipeDrive Pro",
+    "expected_reasoning_keywords": ["pipedrive", "migration", "switching", "objection"]
+  },
+  {
+    "id": "closer_06",
+    "company": "SwiftCommerce",
+    "stage": "negotiation",
+    "arr": 38000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Checking if you had time to review the SLA terms.", "timestamp": "2026-08-14T11:00:00Z"}
+    ],
+    "prospect_message": "Budget has been frozen for Q3 by our CFO. We will revisit in Q1 next year.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["budget", "freeze", "cfo", "objection", "roi", "value"]
+  },
+  {
+    "id": "closer_07",
+    "company": "NextGen Media",
+    "stage": "discovery",
+    "arr": 24000.0,
+    "closer_thread": [],
+    "prospect_message": "Can you integrate with our custom internal postgres database?",
+    "expected_risk_level": "healthy",
+    "expected_action": "follow_up",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["integration", "postgres", "technical", "follow up"]
+  },
+  {
+    "id": "closer_08",
+    "company": "OmniRetail Group",
+    "stage": "proposal",
+    "arr": 90000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Sent revised proposal with multi-year discount.", "timestamp": "2026-08-20T10:00:00Z"}
+    ],
+    "prospect_message": "We are comparing you against HubSpot Enterprise and their native marketing hub.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": "HubSpot",
+    "expected_reasoning_keywords": ["hubspot", "competitor", "marketing", "comparison"]
+  },
+  {
+    "id": "closer_09",
+    "company": "CyberShield Defense",
+    "stage": "negotiation",
+    "arr": 65000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Hi Dave, circling back on implementation kick-off.", "timestamp": "2026-08-05T09:00:00Z"}
+    ],
+    "prospect_message": "The primary champion left the company last week. I am stepping in to evaluate this project.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "follow_up",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["champion", "departure", "handover", "stakeholder", "re-pitch"]
+  },
+  {
+    "id": "closer_10",
+    "company": "GlobalFleet Tracking",
+    "stage": "proposal",
+    "arr": 42000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Sent pricing proposal.", "timestamp": "2026-08-11T15:00:00Z"},
+      {"sender": "rep", "message": "Following up to check if you have any questions.", "timestamp": "2026-08-19T10:00:00Z"}
+    ],
+    "prospect_message": "",
+    "expected_risk_level": "stalled",
+    "expected_action": "follow_up",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["stalled", "follow up", "no response"]
+  },
+  {
+    "id": "closer_11",
+    "company": "EduLearn Global",
+    "stage": "discovery",
+    "arr": 18000.0,
+    "closer_thread": [],
+    "prospect_message": "Your pricing is way too high for non-profit education institutions.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["pricing", "education", "discount", "objection"]
+  },
+  {
+    "id": "closer_12",
+    "company": "AutoDrive Systems",
+    "stage": "negotiation",
+    "arr": 110000.0,
+    "closer_thread": [
+      {"sender": "prospect", "message": "We have signed and uploaded the contract to your portal. Please send invoice.", "timestamp": "2026-08-26T08:00:00Z"}
+    ],
+    "prospect_message": "We have signed and uploaded the contract to your portal. Please send invoice.",
+    "expected_risk_level": "healthy",
+    "expected_action": "no_action",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["signed", "healthy", "closed won"]
+  },
+  {
+    "id": "closer_13",
+    "company": "Zenith Cloud",
+    "stage": "proposal",
+    "arr": 52000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Proposal sent.", "timestamp": "2026-08-15T12:00:00Z"}
+    ],
+    "prospect_message": "Salesforce is already integrated with our ERP, why should we add OmniSales?",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": "Salesforce",
+    "expected_reasoning_keywords": ["salesforce", "erp", "integration", "objection"]
+  },
+  {
+    "id": "closer_14",
+    "company": "PixelCraft Studios",
+    "stage": "discovery",
+    "arr": 28000.0,
+    "closer_thread": [],
+    "prospect_message": "We are only looking for a 3-month trial without an annual commitment.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["contract length", "trial", "commitment", "objection"]
+  },
+  {
+    "id": "closer_15",
+    "company": "Vanguard Security",
+    "stage": "negotiation",
+    "arr": 95000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Checking in on security questionnaire.", "timestamp": "2026-08-16T14:00:00Z"}
+    ],
+    "prospect_message": "Our CISO signed off on your security packet. Ready to finalize terms.",
+    "expected_risk_level": "healthy",
+    "expected_action": "follow_up",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["healthy", "security approved", "finalize", "contract"]
+  },
+  {
+    "id": "closer_16",
+    "company": "Optima Health",
+    "stage": "proposal",
+    "arr": 62000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Sent quote.", "timestamp": "2026-07-25T10:00:00Z"},
+      {"sender": "rep", "message": "Follow up 1.", "timestamp": "2026-08-05T10:00:00Z"},
+      {"sender": "rep", "message": "Follow up 2.", "timestamp": "2026-08-15T10:00:00Z"}
+    ],
+    "prospect_message": "",
+    "expected_risk_level": "stalled",
+    "expected_action": "follow_up",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["stalled", "inactive", "follow up"]
+  },
+  {
+    "id": "closer_17",
+    "company": "Hyperion Energy",
+    "stage": "negotiation",
+    "arr": 85000.0,
+    "closer_thread": [],
+    "prospect_message": "AcmeCRM offers free onboarding and migration assistance. Can you match that?",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": "AcmeCRM",
+    "expected_reasoning_keywords": ["acmecrm", "onboarding", "services", "migration"]
+  },
+  {
+    "id": "closer_18",
+    "company": "Starlight Gaming",
+    "stage": "discovery",
+    "arr": 30000.0,
+    "closer_thread": [],
+    "prospect_message": "How does your pricing scale as our active user count grows from 50k to 500k?",
+    "expected_risk_level": "healthy",
+    "expected_action": "follow_up",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["pricing", "scaling", "volume", "follow up"]
+  },
+  {
+    "id": "closer_19",
+    "company": "Krypton Payments",
+    "stage": "proposal",
+    "arr": 70000.0,
+    "closer_thread": [],
+    "prospect_message": "We need 99.999% SLA and 15-minute response times for critical incidents.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["sla", "support", "enterprise", "objection"]
+  },
+  {
+    "id": "closer_20",
+    "company": "AeroTech Aerospace",
+    "stage": "negotiation",
+    "arr": 150000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Updated agreement with executive discount.", "timestamp": "2026-08-24T16:00:00Z"}
+    ],
+    "prospect_message": "Board meeting is Thursday for final approval. Looks very positive.",
+    "expected_risk_level": "healthy",
+    "expected_action": "no_action",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["healthy", "board approval", "positive"]
+  },
+  {
+    "id": "closer_21",
+    "company": "Nimbus Networks",
+    "stage": "discovery",
+    "arr": 22000.0,
+    "closer_thread": [],
+    "prospect_message": "We are looking at Zoho CRM since it is bundled with our email suite.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": "Zoho",
+    "expected_reasoning_keywords": ["zoho", "bundled", "competitor", "differentiation"]
+  },
+  {
+    "id": "closer_22",
+    "company": "Ironclad Vaults",
+    "stage": "proposal",
+    "arr": 40000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Checking in.", "timestamp": "2026-08-02T10:00:00Z"},
+      {"sender": "rep", "message": "Checking in again.", "timestamp": "2026-08-12T10:00:00Z"}
+    ],
+    "prospect_message": "",
+    "expected_risk_level": "stalled",
+    "expected_action": "follow_up",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["stalled", "follow up"]
+  },
+  {
+    "id": "closer_23",
+    "company": "Pulse Analytics",
+    "stage": "negotiation",
+    "arr": 58000.0,
+    "closer_thread": [],
+    "prospect_message": "Can you offer Net 90 payment terms? Our corporate finance policy requires it.",
+    "expected_risk_level": "at_risk",
+    "expected_action": "objection",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["payment terms", "net 90", "policy", "objection"]
+  },
+  {
+    "id": "closer_24",
+    "company": "TerraFirma AgTech",
+    "stage": "discovery",
+    "arr": 35000.0,
+    "closer_thread": [],
+    "prospect_message": "Can we deploy this on our private AWS VPC?",
+    "expected_risk_level": "healthy",
+    "expected_action": "follow_up",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["deployment", "aws", "vpc", "technical"]
+  },
+  {
+    "id": "closer_25",
+    "company": "Zenith AI",
+    "stage": "negotiation",
+    "arr": 88000.0,
+    "closer_thread": [
+      {"sender": "rep", "message": "Here is the final contract.", "timestamp": "2026-08-25T11:00:00Z"}
+    ],
+    "prospect_message": "We have signed the order form and routed it for payment processing.",
+    "expected_risk_level": "healthy",
+    "expected_action": "no_action",
+    "expected_competitor": null,
+    "expected_reasoning_keywords": ["signed", "healthy", "closed won"]
+  }
+]
