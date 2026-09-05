@@ -76,7 +76,7 @@ async def queue_for_approval(
     draft: str,
     reasoning: str,
     thread_id: str,
-    model_used: str = "llama-3.3-70b-versatile",
+    model_used: str = "openai/gpt-oss-120b",
     tokens_used: int = 0,
     cost: float = 0.0,
 ) -> dict:
@@ -231,5 +231,13 @@ async def list_pending_approvals(org_id: str) -> list[dict]:
 
 if __name__ == "__main__":
     import uvicorn
+    from starlette.responses import JSONResponse
+    from shared.errors import setup_error_handlers
+
+    async def _health(request):
+        return JSONResponse({"status": "healthy", "service": "mcp-approvals"})
+
     mcp_app = mcp.http_app(path="/mcp")
+    setup_error_handlers(mcp_app, service_name="mcp-approvals")
+    mcp_app.add_route("/health", _health, methods=["GET"])
     uvicorn.run(mcp_app, host="0.0.0.0", port=8004)

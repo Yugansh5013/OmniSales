@@ -136,25 +136,34 @@ def _fallback_search(query: str) -> list[dict]:
         {
             "content": "OmniSales provides a 14x faster deal risk detection compared to manual review. "
             "Our autonomous agents monitor deal activity 24/7 and classify risk levels in real-time.",
-            "source": "Product Overview",
+            "source": "fallback_demo_data",
+            "doc_name": "Product Overview",
             "doc_type": "product_doc",
             "relevance_score": 0.92,
+            "is_fallback": True,
+            "fallback_note": "Local demo fallback data (Pinecone vector DB unconfigured or empty)",
         },
         {
             "content": "When a prospect raises pricing concerns, acknowledge their budget constraints, "
             "highlight ROI metrics ($6.1M annual impact), and offer a phased deployment starting "
             "with the Closer agent only at $29/user/mo.",
-            "source": "Objection Handling Playbook",
+            "source": "fallback_demo_data",
+            "doc_name": "Objection Handling Playbook",
             "doc_type": "faq",
             "relevance_score": 0.88,
+            "is_fallback": True,
+            "fallback_note": "Local demo fallback data (Pinecone vector DB unconfigured or empty)",
         },
         {
             "content": "Case Study: DataVault Security reduced sales cycle by 40% using OmniSales. "
             "The Prospector agent identified 12 qualified leads in the first week, and the Closer "
             "agent re-engaged 3 stalled deals worth $180K total ARR.",
-            "source": "DataVault Case Study",
+            "source": "fallback_demo_data",
+            "doc_name": "DataVault Case Study",
             "doc_type": "case_study",
             "relevance_score": 0.85,
+            "is_fallback": True,
+            "fallback_note": "Local demo fallback data (Pinecone vector DB unconfigured or empty)",
         },
     ]
     return knowledge[:3]
@@ -169,20 +178,65 @@ def _fallback_battle_card(competitor_name: str) -> dict:
             "strengths": ["Strong brand", "Large ecosystem", "SOC 2 Type II"],
             "weaknesses": ["No AI agents", "3 native integrations only", "Manual review only"],
             "our_advantage": ["Autonomous AI agents", "14x faster risk detection", "12 MCP servers", "A2A protocol"],
+            "source": "fallback_demo_data",
+            "is_fallback": True,
         },
-        "pipedrivepro": {
-            "competitor": "PipeDrive Pro",
+        "pipedrive": {
+            "competitor": "PipeDrive",
             "pricing": {"starter": "$29/user/mo", "professional": "$49/user/mo"},
             "strengths": ["Lower price point", "Good mobile UX"],
             "weaknesses": ["No multi-agent system", "Basic reporting"],
             "our_advantage": ["Enterprise-grade AI", "Real-time churn prediction", "Kafka event architecture"],
+            "source": "fallback_demo_data",
+            "is_fallback": True,
+        },
+        "hubspot": {
+            "competitor": "HubSpot",
+            "pricing": {"starter": "$50/user/mo", "professional": "$100/user/mo", "enterprise": "$150/user/mo"},
+            "strengths": ["Strong marketing suite", "Large integration marketplace"],
+            "weaknesses": ["Steep pricing at scale", "No autonomous deal governance", "Manual outreach sequencing"],
+            "our_advantage": ["Autonomous multi-agent outreach", "Deal Desk policy gating", "Real-time churn prediction"],
+            "source": "fallback_demo_data",
+            "is_fallback": True,
+        },
+        "salesforce": {
+            "competitor": "Salesforce",
+            "pricing": {"starter": "$25/user/mo", "professional": "$80/user/mo", "enterprise": "$165/user/mo"},
+            "strengths": ["Market leader", "Deep customization", "Huge ecosystem"],
+            "weaknesses": ["High implementation cost", "Requires admin overhead", "No native AI agent orchestration"],
+            "our_advantage": ["Zero-config autonomous agents", "Built-in commercial governance", "Faster time to value"],
+            "source": "fallback_demo_data",
+            "is_fallback": True,
+        },
+        "zoho": {
+            "competitor": "Zoho",
+            "pricing": {"starter": "$20/user/mo", "professional": "$35/user/mo"},
+            "strengths": ["Low cost", "Broad suite of business apps"],
+            "weaknesses": ["Basic AI features", "Limited enterprise governance", "No agent-to-agent intelligence sharing"],
+            "our_advantage": ["A2A competitive intelligence", "LangGraph human-in-the-loop governance", "Autonomous retention plays"],
+            "source": "fallback_demo_data",
+            "is_fallback": True,
         },
     }
     key = competitor_name.lower().replace(" ", "")
-    return cards.get(key, {"competitor": competitor_name, "note": "No battle card data available"})
+    card = cards.get(key, {
+        "competitor": competitor_name,
+        "note": "No battle card data available",
+        "source": "fallback_demo_data",
+        "is_fallback": True,
+    })
+    return card
 
 
 if __name__ == "__main__":
     import uvicorn
+    from starlette.responses import JSONResponse
+    from shared.errors import setup_error_handlers
+
+    async def _health(request):
+        return JSONResponse({"status": "healthy", "service": "mcp-knowledge"})
+
     mcp_app = mcp.http_app(path="/mcp")
+    setup_error_handlers(mcp_app, service_name="mcp-knowledge")
+    mcp_app.add_route("/health", _health, methods=["GET"])
     uvicorn.run(mcp_app, host="0.0.0.0", port=8003)
