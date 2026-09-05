@@ -205,6 +205,8 @@ services:
       MCP_KNOWLEDGE_URL: http://mcp-knowledge:8003/mcp
       MCP_CRM_URL: http://mcp-crm:8001/mcp
       SPY_A2A_URL: http://spy-a2a:8080
+    volumes:
+      - ./evals:/app/evals:ro
     depends_on:
       redis:
         condition: service_healthy

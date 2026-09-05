@@ -1,26 +1,58 @@
+# Environment & Secrets
 .env
 .env.*
 !.env.example
-node_modules/
+
+# Python
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
 venv/
 .venv/
-.idea/
+env/
+ENV/
+
+# Node & Next.js
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs & Diagnostics
+*.log
+_temp_report.html
+scratch/
+
+# Large Video / Media Files
+*.mp4
+*.mov
+*.avi
+docs/media/
+
+# IDE & OS
 .vscode/
-
-# Ignore root-level log, output, and aux text/json/md files
-/*.log
-/*.txt
-!/requirements.txt
-/*.json
-!/package-lock.json
-!/package.json
-/*.md
-!/project_des.md
-!/README.md
-!/omnisales_detailed_report.md
-
-# Ignore ALL python scripts in the root directory (tests and aux files)
-/*.py
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

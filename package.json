@@ -1,0 +1,27 @@
+{
+  "name": "omnisales",
+  "version": "1.0.0",
+  "description": "OmniSales — The Autonomous Revenue Department",
+  "main": "index.js",
+  "scripts": {
+    "docs:pdf": "node scripts/convert_to_pdf.mjs",
+    "dashboard:dev": "npm --prefix dashboard run dev",
+    "dashboard:build": "npm --prefix dashboard run build",
+    "test": "python tests/e2e_test.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yugansh5013/OmniSales.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Yugansh5013/OmniSales/issues"
+  },
+  "homepage": "https://github.com/Yugansh5013/OmniSales#readme",
+  "dependencies": {
+    "marked": "^17.0.5",
+    "puppeteer": "^24.40.0"
+  }
+}
