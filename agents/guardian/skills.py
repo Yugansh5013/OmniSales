@@ -64,26 +64,27 @@ You are a world-class customer success strategist. Generate a TAILORED retention
 - Usage Trend: {usage_trend}
 - Support Tickets: {support_tickets}
 - Contract End: {contract_end}
-
+{feedback_block}
 ## Instructions
 Create a specific, actionable retention play that:
 1. Directly addresses the TOP risk signals (not generic advice)
 2. Proposes a concrete intervention (executive sponsor call, custom training, feature unlock, credit, etc.)
 3. Includes a 30-day action plan with 3 milestones
 4. Estimates the retention probability if executed
+5. Plain text only — do not use markdown asterisks (**) or hashes (##/###).
 
-This must be TAILORED to this specific account. Do NOT use generic templates.
+Output format:
+RETENTION PLAYBOOK: {company}
+Intervention Type: <type of intervention>
+Urgency Level: <Immediate / High / Medium>
+Target Strategy: <2-3 sentences explaining strategy>
 
-Format:
-## Retention Play: {company}
-**Intervention Type:** ...
-**Urgency:** ...
-**Strategy:** ... (2-3 sentences)
-**30-Day Plan:**
-1. Week 1: ...
-2. Week 2: ...
-3. Week 3-4: ...
-**Retention Probability:** ...%
+30-DAY EXECUTION PLAN:
+- Week 1: <specific milestone>
+- Week 2: <specific milestone>
+- Week 3-4: <specific milestone>
+
+Estimated Retention Probability: <percentage>%
 """
 
 USAGE_ANALYSIS_PROMPT = """\

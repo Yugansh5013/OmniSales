@@ -59,7 +59,7 @@ def _get_llm() -> ChatGroq:
     keys = os.environ.get("GROQ_API_KEYS", "")
     key = keys.split(",")[0].strip() if keys else ""
     return ChatGroq(
-        model="llama-3.3-70b-versatile",
+        model="openai/gpt-oss-120b",
         api_key=key,
         temperature=0.3,
         max_tokens=2048,

@@ -32,27 +32,72 @@ You are an expert sales risk analyst. Analyze the following deal data and classi
 {email_thread}
 
 ## Instructions
-Based on the deal context and email history, classify this deal into one of three actions:
+Based on the deal context and email history, classify this deal into one of the following actions:
 
-1. **follow_up** — Deal shows signs of stalling (>5 days silence, unanswered emails, or slow momentum). Draft a re-engagement email.
-2. **objection** — Prospect has raised a specific concern (pricing, competitor, timeline, features). Handle the objection with data.
-3. **no_action** — Deal is healthy and progressing normally. No intervention needed.
+CRITICAL PRIORITY RULES:
+- If the prospect's latest message asks for the payment link, invoice, or says they are ready to pay / move forward / complete onboarding, you MUST select **send_payment_link**. Do NOT select no_action or follow_up.
+- If the prospect asks to meet or discuss call availability, you MUST select **schedule_meeting**.
+- If the prospect raises objections (pricing, competitor comparisons), you MUST select **objection**.
+- Only select **no_action** if the sales rep has already replied or there is no inbound prospect request needing attention.
+
+1. **send_payment_link** — Prospect has agreed to move forward, approved the terms, or asked for the contract, invoice, checkout, or payment link to activate.
+2. **schedule_meeting** — Prospect has agreed to meet, is asking to schedule a call/demo, or discussing meeting availability.
+3. **objection** — Prospect has raised a specific friction or objection (pricing discount, competitor comparison, contract terms, features). Handle with battlecard data.
+4. **follow_up** — Deal shows signs of stalling (>3 days silence, unanswered emails, or slow momentum). Draft a re-engagement email.
+5. **no_action** — No pending prospect requests or healthy active progression without requiring a draft.
 
 Respond in JSON format:
 {{
-    "action": "follow_up" | "objection" | "no_action",
+    "action": "send_payment_link" | "schedule_meeting" | "objection" | "follow_up" | "no_action",
     "risk_score": 0.0-1.0,
     "risk_signals": ["signal 1", "signal 2"],
     "reasoning": "One paragraph explaining your assessment"
 }}
 """
 
-FOLLOWUP_DRAFT_PROMPT = """\
-You are a world-class sales email writer. Draft a follow-up email for a stalled deal.
+PAYMENT_LINK_DRAFT_PROMPT = """\
+You are an executive deal closing specialist. Draft a polished closing email delivering the secure payment activation link to finalize the customer's subscription.
 
 ## Deal Context
 - Company: {company}
-- Contact: {contact_email}
+- Contact Name: {contact_name}
+- Contact First Name: {contact_first_name}
+- Contact Email: {contact_email}
+- Assigned Sales Rep: {rep_name} ({rep_title})
+- Stage: {stage}
+- Agreed ARR: ${arr:,.0f}
+- Payment Link URL: {payment_link_url}
+
+## Email Thread History
+{email_thread}
+
+{feedback_block}
+
+## Instructions
+1. Write a professional, warm closing email celebrating their decision to partner with OmniSales.
+2. Address the prospect directly by their first name: "Hi {contact_first_name}," (e.g. "Hi Aris," or "Hi Alex,"). NEVER use generic greetings like "Hi there" or placeholders like "[First Name]".
+3. Confirm the agreed plan details and ARR (${arr:,.0f}/year).
+4. Provide the secure checkout link:
+   "You can review your agreement and complete the payment here to activate your account: {payment_link_url}"
+5. Outline immediate next steps upon payment (instant access provisioning, dedicated onboarding kickoff with technical CSM).
+6. Sign off with the exact rep signature:
+   Best regards,
+   {rep_name}
+   {rep_title}
+   OmniSales
+   NEVER use generic placeholders like [Your Name] or [Your Title].
+7. Include a clear subject line starting with "Subject: ".
+"""
+
+FOLLOWUP_DRAFT_PROMPT = """\
+You are a world-class sales email writer. Draft a personalized email response for this deal.
+
+## Deal Context
+- Company: {company}
+- Contact Name: {contact_name}
+- Contact First Name: {contact_first_name}
+- Contact Email: {contact_email}
+- Assigned Sales Rep: {rep_name} ({rep_title})
 - Stage: {stage}
 - ARR: ${arr:,.0f}
 - Days silent: {days_silent}
@@ -63,18 +108,31 @@ You are a world-class sales email writer. Draft a follow-up email for a stalled 
 
 ## Relevant Knowledge (RAG)
 {knowledge_context}
-
+{feedback_block}
 ## Instructions
-Write a short, personalized follow-up email that:
-1. Acknowledges the silence without being pushy
-2. Adds new value (a relevant insight, case study, or resource)
-3. Proposes a specific next step (call, demo, or resource share)
-4. Is under 150 words
-5. Matches the tone of previous emails in the thread
+1. If the prospect's latest email is asking to schedule a call, demo, or meeting:
+   - Enthusiastically accept the meeting request.
+   - Propose 2-3 specific time windows (e.g. tomorrow at 10:00 AM EST or 2:00 PM EST).
+   - State a brief 3-bullet agenda covering their requirements, commercial pilot terms, and next steps.
+   - Keep it concise, high-energy, and easy to confirm.
+2. If this is a follow-up for a stalled deal:
+   - Acknowledge the silence without being pushy.
+   - Add new value (an ROI benchmark or customer insight).
+   - Propose a specific next step.
+3. Under 150 words.
+4. Greet the contact by their real first name: "Hi {contact_first_name}," — NEVER use generic greetings like "Hi there," or bracket placeholders like [First Name].
+5. Sign off cleanly and professionally with the assigned sales rep:
+Best regards,
+{rep_name}
+{rep_title}
+OmniSales
+NEVER use bracket placeholders like [Your Name], [Your Title], or [Company].
+6. Plain text only — this is a real email, not a markdown document. Do not use **, ##, bullet points, or markdown syntax.
 
-Format as:
-Subject: ...
-Body: ...
+Output format:
+Subject: <compelling subject line>
+
+<email body starting directly with the greeting, do not prefix with the word 'Body:'>
 """
 
 OBJECTION_HANDLING_PROMPT = """\
@@ -82,6 +140,9 @@ You are an expert at handling sales objections with data-driven responses.
 
 ## Deal Context
 - Company: {company}
+- Contact Name: {contact_name}
+- Contact First Name: {contact_first_name}
+- Assigned Sales Rep: {rep_name} ({rep_title})
 - Stage: {stage}
 - ARR: ${arr:,.0f}
 - Objection Type: {objection_type}
@@ -94,7 +155,7 @@ You are an expert at handling sales objections with data-driven responses.
 
 ## Relevant Knowledge (RAG)
 {knowledge_context}
-
+{feedback_block}
 ## Instructions
 Draft a response email that:
 1. Validates their concern (don't dismiss it)
@@ -102,10 +163,19 @@ Draft a response email that:
 3. Pivots to our strengths (reference specific differentiators)
 4. Proposes a concrete next step
 5. Is under 200 words
+6. Greet the contact by their real first name: "Hi {contact_first_name}," — NEVER use generic greetings like "Hi there," or bracket placeholders like [First Name].
+7. Sign off cleanly and professionally with the assigned sales rep:
+Best regards,
+{rep_name}
+{rep_title}
+OmniSales
+NEVER use bracket placeholders like [Your Name], [Your Title], or [Company].
+8. Plain text only — this is a real email, not a markdown document. Do not use **, ##, bullet points, or any markdown syntax anywhere in the output.
 
-Format as:
-Subject: ...
-Body: ...
+Output format:
+Subject: <compelling subject line>
+
+<email body starting directly with the greeting, do not prefix with the word 'Body:'>
 """
 
 SENTIMENT_ANALYSIS_PROMPT = """\

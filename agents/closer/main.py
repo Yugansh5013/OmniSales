@@ -10,9 +10,13 @@ from uuid import uuid4
 from fastapi import FastAPI
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from pydantic import BaseModel
 
 from agents.closer.graph import build_closer_graph
 from agents.closer.skills import build_closer_skills
+from shared.errors import setup_error_handlers
+from shared.llm import synthesize_natural_reasoning
+from shared.mcp_utils import unwrap_mcp
 from shared.skills import SkillRegistry
 from shared.state import AgentState
 
@@ -48,6 +52,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="OmniSales Closer Agent", lifespan=lifespan)
+setup_error_handlers(app, service_name="closer-agent")
 
 
 async def _get_tools():
@@ -90,10 +95,27 @@ async def trigger_closer(deal_id: str):
     task_id = None
     if result.get("draft"):
         deal = result.get("metadata", {}).get("deal", {})
+        llm_usage = result.get("metadata", {}).get("llm_usage", {})
         approval_tools = {t.name: t for t in tools}
         if "queue_for_approval" in approval_tools:
             try:
-                task_type = "objection_response" if result.get("action") == "objection" else "email_draft"
+                action_val = result.get("action", "")
+                if action_val == "objection":
+                    task_type = "objection_response"
+                elif action_val in ("schedule_meeting", "meeting"):
+                    task_type = "meeting_confirmation"
+                elif action_val in ("send_payment_link", "payment_link", "contract_and_payment"):
+                    task_type = "send_contract_and_payment"
+                else:
+                    task_type = "email_draft"
+                raw_trace = result.get("reasoning", [])
+                natural_reasoning = await synthesize_natural_reasoning(
+                    agent_name="closer",
+                    task_type=task_type,
+                    target_name=deal.get("company", "Unknown"),
+                    raw_trace=raw_trace,
+                    context={"arr": deal.get("arr"), "stage": deal.get("stage"), "risk": deal.get("risk_level")},
+                )
                 qr = await approval_tools["queue_for_approval"].ainvoke({
                     "org_id": str(deal.get("org_id", "a0000000-0000-0000-0000-000000000001")),
                     "agent_name": "closer",
@@ -101,13 +123,14 @@ async def trigger_closer(deal_id: str):
                     "target_id": str(deal.get("id", "a0000000-0000-0000-0000-000000000001")),
                     "target_name": deal.get("company", "Unknown"),
                     "draft": result.get("draft", ""),
-                    "reasoning": "\n".join(result.get("reasoning", [])),
+                    "reasoning": natural_reasoning,
                     "thread_id": thread_id,
-                    "model_used": "llama-3.3-70b-versatile",
-                    "tokens_used": 0,
-                    "cost": 0.0,
+                    "model_used": llm_usage.get("model_used", "openai/gpt-oss-120b"),
+                    "tokens_used": llm_usage.get("tokens_used", 0),
+                    "cost": llm_usage.get("cost", 0.0),
                 })
-                task_id = qr.get("task_id") if isinstance(qr, dict) else None
+                task_data = unwrap_mcp(qr)
+                task_id = task_data.get("task_id")
                 logger.info("✅ Queued closer approval: %s for %s", task_id, deal.get("company"))
             except Exception as e:
                 logger.exception("Failed to queue closer approval: %s", e)
@@ -119,6 +142,71 @@ async def trigger_closer(deal_id: str):
         "status": "awaiting_approval" if result.get("draft") else "no_action",
         "task_id": task_id,
     }
+
+
+class RegenerateRequest(BaseModel):
+    feedback: str
+    previous_draft: str = ""
+
+
+@app.post("/regenerate/{deal_id}")
+async def regenerate_closer(deal_id: str, body: RegenerateRequest):
+    """Re-draft after a human rejection, folding their feedback into the prompt.
+    Bypasses the graph/checkpointer (the /trigger flow already does — the graph
+    interrupts before human review and never actually resumes) and re-runs the
+    node functions directly so the feedback reaches the LLM this time."""
+    from agents.closer.nodes import analyze_deal, classify_risk, draft_followup, handle_objection
+
+    tools = await _get_tools()
+    state: AgentState = {
+        "messages": [], "lead_id": None, "deal_id": deal_id, "account_id": None,
+        "action": "", "draft": None, "approval": None, "reasoning": [],
+        "metadata": {"revision_feedback": body.feedback, "previous_draft": body.previous_draft},
+    }
+    state = await analyze_deal(state, tools)
+    state = await classify_risk(state, tools)
+    if state["action"] == "objection":
+        state = await handle_objection(state, tools)
+    elif state["action"] == "follow_up":
+        state = await draft_followup(state, tools)
+    else:
+        return {"status": "no_action", "draft": None, "task_id": None}
+
+    deal = state["metadata"]["deal"]
+    llm_usage = state["metadata"].get("llm_usage", {})
+    approval_tools = {t.name: t for t in tools}
+    task_id = None
+    if "queue_for_approval" in approval_tools:
+        try:
+            task_type = "objection_response" if state.get("action") == "objection" else "email_draft"
+            raw_trace = state.get("reasoning", []) + [f"Human feedback addressed: {body.feedback}"]
+            natural_reasoning = await synthesize_natural_reasoning(
+                agent_name="closer",
+                task_type=task_type,
+                target_name=deal.get("company", "Unknown"),
+                raw_trace=raw_trace,
+                context={"feedback": body.feedback, "arr": deal.get("arr"), "stage": deal.get("stage")},
+            )
+            qr = await approval_tools["queue_for_approval"].ainvoke({
+                "org_id": str(deal.get("org_id", "a0000000-0000-0000-0000-000000000001")),
+                "agent_name": "closer",
+                "task_type": task_type,
+                "target_id": str(deal.get("id", deal_id)),
+                "target_name": deal.get("company", "Unknown"),
+                "draft": state.get("draft", ""),
+                "reasoning": natural_reasoning,
+                "thread_id": str(uuid4()),
+                "model_used": llm_usage.get("model_used", "openai/gpt-oss-120b"),
+                "tokens_used": llm_usage.get("tokens_used", 0),
+                "cost": llm_usage.get("cost", 0.0),
+            })
+            task_data = unwrap_mcp(qr)
+            task_id = task_data.get("task_id")
+            logger.info("✅ Regenerated closer draft for %s per feedback → task %s", deal.get("company"), task_id)
+        except Exception as e:
+            logger.exception("Failed to queue regenerated closer draft: %s", e)
+
+    return {"task_id": task_id, "draft": state.get("draft"), "status": "awaiting_approval" if task_id else "error"}
 
 
 @app.post("/resume/{thread_id}")

@@ -32,9 +32,12 @@ skill_registry = SkillRegistry(
 for skill in build_spy_skills():
     skill_registry.register(skill)
 
+from shared.errors import setup_error_handlers
+
 # ── App ──
 
 app = FastAPI(title="OmniSales Spy A2A Server")
+setup_error_handlers(app, service_name="spy-a2a")
 
 _pool: asyncpg.Pool | None = None
 
@@ -95,6 +98,15 @@ async def handle_task(request: Request):
     if "battlecard" in text_lower or "battle_card" in text_lower:
         competitor = text.split()[-1] if text.split() else "AcmeCRM"
         result = await skill_registry.execute_skill("get_battlecard", competitor_name=competitor)
+    elif "price_history" in text_lower or "pricing_history" in text_lower:
+        competitor = text.split()[-1] if text.split() else "AcmeCRM"
+        result = await skill_registry.execute_skill("get_price_history", competitor_name=competitor)
+    elif "winback" in text_lower or "win_back" in text_lower:
+        competitor = text.split()[-1] if text.split() else "AcmeCRM"
+        result = await skill_registry.execute_skill("get_winback_strategy", competitor_name=competitor)
+    elif "usage" in text_lower and "competitor" in text_lower:
+        competitor = text.split()[-1] if text.split() else "AcmeCRM"
+        result = await skill_registry.execute_skill("get_competitor_usage", competitor_name=competitor)
     elif "analyze" in text_lower and "competitor" in text_lower:
         competitor = text.split()[-1] if text.split() else "AcmeCRM"
         result = await skill_registry.execute_skill("analyze_competitor", competitor_name=competitor)

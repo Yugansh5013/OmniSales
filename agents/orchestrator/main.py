@@ -20,9 +20,11 @@ from fastapi import FastAPI
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from pydantic import BaseModel
 
-from agents.orchestrator.scanner import run_full_scan, get_scan_history, get_scan_report
+from agents.orchestrator.scanner import run_full_scan, stream_portfolio_scan, get_scan_history, get_scan_report
 from agents.orchestrator.chat import handle_chat
 from shared.skills import SkillRegistry, Skill, SkillInput
+from fastapi.responses import StreamingResponse
+import json
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -125,6 +127,24 @@ async def _scan_loop():
         await asyncio.sleep(SCAN_INTERVAL)
 
 
+async def _kafka_consumer_loop():
+    """Consume guardian.churn_risk events from Kafka."""
+    from shared.kafka import subscribe
+
+    async def _handle_churn(payload: dict):
+        logger.info(
+            "📡 [Kafka Event Received] guardian.churn_risk: Account=%s (%s) Risk=%.2f",
+            payload.get("account_id"),
+            payload.get("company"),
+            payload.get("churn_risk", 0.0),
+        )
+
+    try:
+        await subscribe("guardian.churn_risk", group_id="orchestrator_supervisor", handler=_handle_churn)
+    except Exception as e:
+        logger.warning("Kafka subscriber loop ended/skipped: %s", e)
+
+
 # ── Lifespan ──
 
 
@@ -143,13 +163,17 @@ async def lifespan(app: FastAPI):
             "Orchestrator V2 started — %d skills, AUTO-SCAN OFF (use /scan endpoint)",
             len(skill_registry.list_skills()),
         )
+
+    # Start Kafka background consumer
+    kafka_task = asyncio.create_task(_kafka_consumer_loop())
     yield
     if _scan_task:
         _scan_task.cancel()
-    logger.info("Orchestrator agent shutting down")
-
+    kafka_task.cancel()
+from shared.errors import setup_error_handlers
 
 app = FastAPI(title="OmniSales Orchestrator Agent V2", lifespan=lifespan)
+setup_error_handlers(app, service_name="orchestrator-agent")
 
 
 # ── Request/Response Models ──
@@ -178,6 +202,29 @@ async def manual_scan():
     result = await run_full_scan(crm_tools, _scan_count, triggered_by="manual")
     _last_scan_result = result
     return result
+
+
+@app.get("/scan/stream")
+async def scan_stream():
+    """Stream real-time micro-events as each entity is inspected and dispatched."""
+    global _scan_count
+    _scan_count += 1
+
+    crm_tools = await _get_crm_tools()
+
+    async def sse_event_generator():
+        async for event in stream_portfolio_scan(crm_tools, _scan_count):
+            yield f"data: {json.dumps(event)}\n\n"
+
+    return StreamingResponse(
+        sse_event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.post("/chat")

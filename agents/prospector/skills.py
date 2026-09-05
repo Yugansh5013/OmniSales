@@ -18,7 +18,8 @@ logger = logging.getLogger(__name__)
 # ── Prompt templates ──
 
 ICP_SCORING_PROMPT = """\
-You are an ICP (Ideal Customer Profile) scoring engine. Analyze the company data and score how well they match our ideal customer.
+You are an ICP (Ideal Customer Profile) scoring engine for an enterprise B2B sales automation platform.
+Analyze the company data and score how well they match our target customer profile.
 
 ## Company Data
 - Company: {company}
@@ -29,15 +30,13 @@ You are an ICP (Ideal Customer Profile) scoring engine. Analyze the company data
 - Tech Stack: {tech_stack}
 - Buying Signals: {signals}
 
-## Our ICP Criteria
-- SaaS company with 50-500 employees (sweet spot: 100-300)
-- Series A to Series C stage
-- $5M-$50M ARR
-- Already using a CRM (Salesforce, HubSpot, Pipedrive)
-- Actively hiring sales roles (AEs, SDRs, RevOps)
-- Recent leadership change in sales/revenue org
+## ICP Scoring Rubric & Tier Definitions
+- Tier A (Score 0.80 - 1.0): High-fit B2B SaaS / Enterprise Software / Tech (100-1000+ employees, $15M-$100M+ ARR, uses enterprise CRM like Salesforce/HubSpot, active B2B motion). Larger software companies are prime high-value accounts.
+- Tier B (Score 0.60 - 0.79): Core B2B SaaS / Tech companies (50-250 employees, $5M-$25M ARR, using CRM like HubSpot/Salesforce, growing tech stack).
+- Tier C (Score 0.25 - 0.59): Moderate / Emerging fit (Agencies, digital/marketing services, construction/field tech, 15-50 employees, $1M-$5M revenue, basic or adjacent tools).
+- Tier D (Score 0.0 - 0.24): Out of Profile / Disqualified (Local retail, food & beverage, hospitality, personal services, plumbing/landscaping, <20 employees, basic retail POS like Toast, Square, Mindbody).
 
-Score from 0.0 to 1.0 and assign a tier. Respond in JSON:
+Return JSON only:
 {{
     "icp_score": 0.0-1.0,
     "tier": "A" | "B" | "C" | "D",
@@ -52,27 +51,40 @@ You are an expert cold outreach copywriter. Draft a 3-email sequence for a decis
 
 ## Target Contact
 - Name: {contact_name}
+- First Name: {contact_first_name}
 - Title: {contact_title}
 - Company: {company}
+- Assigned Sales Rep: {rep_name} ({rep_title})
 
 ## Company Context
 - Industry: {industry}
 - ICP Score: {icp_score} (Tier {tier})
 - Key Signals: {signals}
 - Funding: {funding}
-
+{feedback_block}
 ## Instructions
 Write 3 emails in a sequence:
-1. **Email 1 (Day 1 — Pattern Interrupt):** Open with a specific insight about THEIR company, not about us. Reference a signal. Under 80 words.
-2. **Email 2 (Day 3 — Value Drop):** Share a relevant case study or data point. Under 100 words.
-3. **Email 3 (Day 7 — Direct Ask):** Direct ask for a 15-minute call. Reference the previous emails. Under 60 words.
+1. Email 1 (Day 1 — Pattern Interrupt): Open with a specific insight about THEIR company, not about us. Reference a signal. Under 80 words.
+2. Email 2 (Day 3 — Value Drop): Share a relevant case study or data point. Under 100 words.
+3. Email 3 (Day 7 — Direct Ask): Direct ask for a 15-minute call. Reference the previous emails. Under 60 words.
 
 Each email must be hyper-personalized to the contact's role and company. No generic templates.
+Greet the contact by their real first name: "Hi {contact_first_name}," — NEVER use generic greetings like "Hi there," or bracket placeholders like [First Name].
+Sign off each email with:
+Best regards,
+{rep_name}
+{rep_title}
+OmniSales
+NEVER use bracket placeholders like [Your Name], [Your Title], or [Company].
+
+Plain text only — these are real emails, not a markdown document. Do not use **, ##, ###, or any markdown syntax anywhere in the output.
 
 Format each as:
-### Email {{n}} (Day {{day}})
+Email {n} (Day {day})
 Subject: ...
 Body: ...
+
+Separate the three emails with a line containing only ---
 """
 
 COMPANY_RESEARCH_PROMPT = """\

@@ -64,12 +64,20 @@ def build_closer_graph(tools: list, checkpointer: AsyncPostgresSaver):
     # Edges
     graph.add_edge("analyze", "classify")
 
+    def _route_classify(s: AgentState) -> str:
+        act = s.get("action", "")
+        if act == "objection":
+            return "objection"
+        if act == "no_action":
+            return "no_action"
+        return "draft"
+
     # Conditional: classify → draft | objection | END
     graph.add_conditional_edges(
         "classify",
-        lambda s: s["action"],
+        _route_classify,
         {
-            "follow_up": "draft",
+            "draft": "draft",
             "objection": "objection",
             "no_action": END,
         },

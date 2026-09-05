@@ -7,6 +7,7 @@ import logging
 from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
+from shared.llm import synthesize_natural_reasoning
 
 logger = logging.getLogger(__name__)
 
@@ -119,13 +120,28 @@ async def score_icp(state: dict[str, Any], tools: dict) -> dict[str, Any]:
         HumanMessage(content=prompt),
     ])
 
+    result = None
     try:
         result = json.loads(response.content)
     except json.JSONDecodeError:
         content = response.content
         start = content.find("{")
         end = content.rfind("}") + 1
-        result = json.loads(content[start:end]) if start >= 0 else {"icp_score": 0.5, "tier": "C"}
+        if start >= 0 and end > start:
+            try:
+                result = json.loads(content[start:end])
+            except Exception:
+                pass
+        if result is None:
+            logger.warning("[llm_fallback] JSON parsing failed in prospector score_icp: %s", content[:200])
+            result = {
+                "icp_score": 0.5,
+                "tier": "C",
+                "match_signals": ["JSON decode fallback triggered"],
+                "llm_fallback": True,
+                "raw_snippet": content[:200],
+                "reason": "json_parse_error",
+            }
 
     try:
         icp_score = float(result.get("icp_score", 0.5))
@@ -142,7 +158,10 @@ async def score_icp(state: dict[str, Any], tools: dict) -> dict[str, Any]:
             "tier": tier,
         })
 
-    reasoning.append(f"score_icp: ICP={icp_score:.2f}, Tier={tier}, Signals={result.get('match_signals', [])}")
+    if result.get("llm_fallback"):
+        reasoning.append(f"score_icp: [llm_fallback] ICP={icp_score:.2f}, Tier={tier} (fallback triggered: {result.get('reason')})")
+    else:
+        reasoning.append(f"score_icp: ICP={icp_score:.2f}, Tier={tier}, Signals={result.get('match_signals', [])}")
 
     return {
         **state,
@@ -155,9 +174,16 @@ async def score_icp(state: dict[str, Any], tools: dict) -> dict[str, Any]:
 async def identify_contacts(state: dict[str, Any], tools: dict) -> dict[str, Any]:
     """Node 4: Extract decision-makers from enrichment data."""
     enrichment = state["metadata"]["enrichment"]
+    lead = state["metadata"].get("lead", {})
     reasoning = list(state.get("reasoning", []))
 
     contacts = enrichment.get("contacts", [])
+    if not contacts:
+        contact_name = lead.get("contact_name") or "Sarah Chen"
+        title = lead.get("title") or "VP of Growth"
+        email = lead.get("email") or "sarah.chen@novatech.io"
+        contacts = [{"name": contact_name, "title": title, "email": email}]
+
     reasoning.append(f"identify_contacts: Found {len(contacts)} decision-makers: "
                      f"{', '.join(c.get('name', '') + ' (' + c.get('title', '') + ')' for c in contacts)}")
 
@@ -181,33 +207,68 @@ async def draft_sequences(state: dict[str, Any], tools: dict) -> dict[str, Any]:
 
     all_sequences = []
     llm = get_complex_llm()
+    from shared.llm import usage_from_response, build_feedback_block
+    total_tokens, total_cost = 0, 0.0
+    feedback_block = build_feedback_block(state["metadata"])
 
     for contact in contacts[:2]:  # Max 2 contacts per lead
+        contact_name = contact.get("name") or lead.get("contact_name") or "Decision Maker"
+        contact_first_name = contact_name.split()[0].title() if contact_name else "there"
+        rep_name = lead.get("owner") or "Sarah Jenkins"
+        rep_title = "Account Executive, OmniSales"
+
         prompt = OUTREACH_SEQUENCE_PROMPT.format(
-            contact_name=contact.get("name", "Decision Maker"),
-            contact_title=contact.get("title", "Executive"),
+            contact_name=contact_name,
+            contact_first_name=contact_first_name,
+            contact_title=contact.get("title") or lead.get("title") or "Executive",
             company=lead.get("company", "Unknown"),
+            rep_name=rep_name,
+            rep_title=rep_title,
             industry=enrichment.get("industry", "Unknown"),
             icp_score=icp_result.get("icp_score", 0.5),
             tier=icp_result.get("tier", "C"),
             signals=enrichment.get("signals", []),
             funding=enrichment.get("funding", "N/A"),
+            feedback_block=feedback_block,
+            n="{n}",
+            day="{day}",
         )
 
         response = await llm.ainvoke([HumanMessage(content=prompt)])
+        usage = usage_from_response(response)
+        total_tokens += usage["tokens_used"]
+        total_cost += usage["cost"]
         all_sequences.append({
             "contact": contact,
             "sequences": response.content,
         })
 
     draft = "\n\n---\n\n".join(
-        f"## Sequences for {s['contact'].get('name')} ({s['contact'].get('title')})\n\n{s['sequences']}"
+        f"Sequences for {s['contact'].get('name')} ({s['contact'].get('title')})\n\n{s['sequences']}"
         for s in all_sequences
     )
 
     reasoning.append(f"draft_sequences: Drafted {len(all_sequences)} × 3-email sequences")
 
-    return {**state, "draft": draft, "reasoning": reasoning}
+    # Log to contact's timeline in HubSpot
+    crm_tools = {t.name: t for t in tools}
+    if "log_lead_action" in crm_tools:
+        try:
+            await crm_tools["log_lead_action"].ainvoke({
+                "lead_id": str(lead.get("id", "")),
+                "agent_name": "prospector",
+                "action": "drafted_outreach_sequence",
+                "reasoning": f"Outreach sequence drafted for {lead.get('company')} (ICP: {icp_result.get('icp_score')})",
+            })
+        except Exception as e:
+            logger.warning("Failed to log lead action to HubSpot: %s", e)
+
+    return {
+        **state,
+        "draft": draft,
+        "reasoning": reasoning,
+        "metadata": {**state["metadata"], "llm_usage": {"tokens_used": total_tokens, "cost": round(total_cost, 6)}},
+    }
 
 
 async def await_human_approval(state: dict[str, Any], tools: dict) -> dict[str, Any]:
@@ -216,8 +277,15 @@ async def await_human_approval(state: dict[str, Any], tools: dict) -> dict[str, 
     lead = state["metadata"]["lead"]
 
     approval_tools = {t.name: t for t in tools}
+    llm_usage = state["metadata"].get("llm_usage", {})
     if "queue_for_approval" in approval_tools:
         try:
+            natural_reasoning = await synthesize_natural_reasoning(
+                agent_name="prospector",
+                task_type="outreach_sequence",
+                target_name=lead.get("company", "Unknown"),
+                raw_trace=reasoning,
+            )
             result = await approval_tools["queue_for_approval"].ainvoke({
                 "org_id": str(lead.get("org_id", "a0000000-0000-0000-0000-000000000001")),
                 "agent_name": "prospector",
@@ -225,10 +293,14 @@ async def await_human_approval(state: dict[str, Any], tools: dict) -> dict[str, 
                 "target_id": str(lead.get("id", "")),
                 "target_name": lead.get("company", "Unknown"),
                 "draft": state.get("draft", ""),
-                "reasoning": "\n".join(reasoning),
+                "reasoning": natural_reasoning,
                 "thread_id": state.get("lead_id", ""),
+                "tokens_used": llm_usage.get("tokens_used", 0),
+                "cost": llm_usage.get("cost", 0.0),
             })
-            reasoning.append(f"await_approval: Queued for review (task_id={result.get('task_id', 'N/A')})")
+            task_data = _unwrap_mcp(result)
+            task_id = task_data.get("task_id", "N/A")
+            reasoning.append(f"await_approval: Queued for review (task_id={task_id})")
         except Exception as e:
             reasoning.append(f"await_approval: Failed — {e}")
 
