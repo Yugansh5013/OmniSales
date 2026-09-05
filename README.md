@@ -1,372 +1,268 @@
 <p align="center">
   <img src="https://img.shields.io/badge/LangGraph-0.2+-purple?style=for-the-badge&logo=langchain" />
-  <img src="https://img.shields.io/badge/Groq-Llama%203.3%2070B-orange?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/MCP-Protocol-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Groq-GPT--OSS%20120B%20%2F%2020B-orange?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/MCP-FastMCP%20Protocol-blue?style=for-the-badge" />
   <img src="https://img.shields.io/badge/A2A-Google%20Protocol-green?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Razorpay-Payment%20Links-002970?style=for-the-badge&logo=razorpay" />
   <img src="https://img.shields.io/badge/Kafka-Event%20Bus-red?style=for-the-badge&logo=apachekafka" />
   <img src="https://img.shields.io/badge/Kubernetes-KEDA-326CE5?style=for-the-badge&logo=kubernetes" />
 </p>
 
 # 🚀 OmniSales — The Autonomous Revenue Department
 
-> **A multi-agent AI system that replaces your entire sales software stack with four autonomous, specialized AI agents.**
+> **An enterprise multi-agent AI system that unifies B2B prospecting, stalled deal closing, customer retention, competitive intelligence, and commercial policy governance into a human-governed autonomous pipeline.**
 
-OmniSales doesn't just store data like a CRM — it **reads** data continuously, **makes decisions** based on real-time signals, **executes** complex workflows, and **self-corrects** based on engagement outcomes. Humans stay in the loop as strategic supervisors, not data-entry operators.
+OmniSales doesn't just store data like a passive CRM — it **scans telemetry continuously**, **reasons across multi-agent swarms**, **executes** objection handling and outreach, and **enforces commercial policies** before issuing **Razorpay payment links**. Sales reps stay in the loop as strategic supervisors with full draft-editing and approval controls.
 
 ---
 
 ## 📋 Table of Contents
 
 - [Why OmniSales?](#-why-omnisales)
-- [Architecture Overview](#-architecture-overview)
-- [The Agent Workforce](#-the-agent-workforce)
+- [Architecture & Communication Protocols](#-architecture--communication-protocols)
+- [The Autonomous Agent Swarm](#-the-autonomous-agent-swarm)
+- [Deal Desk & Razorpay Governance](#-deal-desk--razorpay-governance)
+- [Real-Time Swarm Mission Control](#-real-time-swarm-mission-control)
+- [Human-in-the-Loop & Live Email Reply Loop](#-human-in-the-loop--live-email-reply-loop)
+- [Evals, Reliability & LangSmith Tracing](#-evals-reliability--langsmith-tracing)
 - [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
 - [Quick Start](#-quick-start)
-- [Environment Variables](#-environment-variables)
-- [API Reference](#-api-reference)
-- [Demo Scenarios](#-demo-scenarios)
-- [Kubernetes & Scaling](#-kubernetes--scaling)
 - [Documentation](#-documentation)
 
 ---
 
 ## ❓ Why OmniSales?
 
-Traditional sales teams spend **80% of their time on information routing** — researching leads, drafting emails, updating CRMs, checking for replies, and following up. These are automatable workflows, not tasks requiring human judgment.
+Traditional B2B sales teams spend **80% of their working hours on manual routing and administrative overhead** — searching company firmographics, drafting repetitive follow-ups, monitoring deal silence, and updating disconnected dashboards.
 
-| Problem | What Happens Today | What OmniSales Does |
+| Revenue Leak | Traditional CRM Problem | OmniSales Autonomous Solution |
 | :--- | :--- | :--- |
-| **Leaked Revenue** | Reps miss follow-ups, deals go to competitors | Closer Agent detects stale deals in real-time |
-| **Pipeline Rot** | Deals go cold without anyone noticing | Daily autonomous staleness scans + re-engagement |
-| **Customer Churn** | Warning signals buried in usage dashboards | Guardian Agent scores churn risk from multi-signal analysis |
-| **Slow Competitive Intel** | Reps learn about competitor changes days late | Spy Agent scrapes + broadcasts battle cards via A2A |
-| **Manual Prospecting** | SDRs spend hours researching each lead manually | Prospector Agent enriches, scores, and drafts in seconds |
-
-**Impact:** 50.7% cost reduction · 3.1× revenue multiplier · 84% cheaper customer acquisition · 6.3× better ROI ([see detailed financial model](omnisales_detailed_report.md#11-detailed-financial-impact-model))
+| **Pipeline Rot & Stalled Deals** | Deals go cold after objections without follow-up | **Closer Agent** detects stall duration, fetches competitor intel via A2A, and drafts counter-objection responses |
+| **Manual Prospecting & SDR Fatigue** | SDRs spend hours researching leads manually | **Prospector Agent** enriches firmographics, scores ICP fit, and crafts multi-persona sequences |
+| **Silent Customer Churn** | P1 tickets and usage drops hide in telemetry | **Guardian Agent** scores predictive churn risk and formulates 30-day executive alignment playbooks |
+| **Stale Competitive Battlecards** | Battlecards stored in static slide decks | **Spy Agent** fetches live competitor pricing, strengths, and weaknesses via Google A2A protocol |
+| **Unauthorized Discounting** | Reps offer unapproved 50%+ discounts | **Deal Desk Engine** enforces commercial policies and generates compliant Razorpay payment links |
 
 ---
 
-## 🏗 Architecture Overview
+## 🏗 Architecture & Communication Protocols
 
-OmniSales is built on a **Three-Protocol Communication Model**:
+OmniSales operates across a **Three-Protocol Communication Model**:
 
 ```
-MCP   → Vertical:   Agent talks DOWN to external tools (CRM, Email, RAG)
-A2A   → Horizontal: Agent talks ACROSS to other agents (sync intelligence sharing)
-Kafka → Async:      Agent BROADCASTS signals to all listeners (event-driven triggers)
+MCP (Vertical)   → Agent queries tools downwards (FastMCP CRM, Knowledge RAG, Approvals DB)
+A2A (Horizontal) → Closer queries Spy Agent across services via Google Agent-to-Agent standard
+Kafka (Async)    → Event-driven broadcasting (Guardian churn signals consumed by Orchestrator)
+SSE (Real-Time)  → Server-Sent Events stream live microsecond telemetry to Swarm Mission Control
+CRM Sync (Live)  → Bidirectional sync with HubSpot CRM (Deals, Leads, Contacts, Pipeline Stages)
 ```
 
 ```mermaid
 flowchart TD
-    subgraph Frontend
-        UI["🖥 Next.js Dashboard"] --> GW["⚡ FastAPI Gateway :8000"]
+    subgraph Frontend ["Frontend UI (Next.js 16)"]
+        UI["🖥 Next.js Command Center :3000"]
+        MC["🛰️ Swarm Mission Control (SSE)"]
     end
-    subgraph Agents ["Agentic Pipeline"]
-        ORC["🧠 Orchestrator"] --> CL["🎯 Closer"]
-        ORC --> PR["🔍 Prospector"]
-        ORC --> GR["🛡 Guardian"]
+
+    subgraph Gateway ["API Gateway"]
+        GW["⚡ FastAPI Gateway :8000"]
     end
-    subgraph MCP ["MCP Servers"]
-        CRM["💾 CRM Server"] 
-        KNW["📚 Knowledge Server"]
-        APR["✅ Approvals Server"]
+
+    subgraph Agents ["Autonomous Agent Swarm"]
+        ORC["🧠 Orchestrator Supervisor :9004"]
+        PR["🔍 Prospector Agent :9002"]
+        CL["🎯 Closer Agent :9001"]
+        GR["🛡️ Guardian Agent :9003"]
+        SPY["🕵️ Spy Agent (Google A2A) :8080"]
     end
-    subgraph Infra ["Infrastructure"]
+
+    subgraph Governance ["Commercial Governance"]
+        DD["⚖️ Deal Desk Policy Engine"]
+        RZ["💳 Razorpay Payment API"]
+    end
+
+    subgraph MCP ["FastMCP Protocol Servers"]
+        CRM["💾 FastMCP CRM Server :8001"] 
+        KNW["📚 FastMCP Knowledge Server :8003"]
+        APR["✅ FastMCP Approvals Server :8004"]
+    end
+
+    subgraph External ["External Enterprise CRM"]
+        HS["🟧 HubSpot CRM API (Bidirectional Sync)"]
+    end
+
+    subgraph Storage ["Data & Messaging Bus"]
         NEON["🐘 Neon PostgreSQL"]
-        KFK["🚂 Kafka"]
-        PC["🌲 Pinecone"]
-        SPY["🕵 Spy A2A Server"]
+        REDIS["⚡ Redis Cache"]
+        KFK["🚂 Apache Kafka"]
     end
+
+    UI --> GW
+    MC -.->|SSE Stream| GW
     GW --> ORC
-    Agents -.-> MCP
+    ORC --> PR
+    ORC --> CL
+    ORC --> GR
+    CL <-->|Google A2A Protocol| SPY
+    CL --> DD
+    DD --> RZ
+    Agents --> MCP
+    CRM <--> HS
     CRM --> NEON
-    KNW --> PC
-    Agents -.-> KFK
-    CL -.-> SPY
+    KNW --> NEON
+    APR --> NEON
+    GR -.->|guardian.churn_risk| KFK
+    KFK -.-> ORC
 ```
 
 ---
 
-## 🤖 The Agent Workforce
+## 🤖 The Autonomous Agent Swarm
 
-### 🔍 The Prospector — New Customer Acquisition
-Researches target companies, enriches contact data, scores leads against ICP criteria using LLM, and drafts hyper-personalized multi-email outreach sequences. All drafts go through human approval before sending.
+### 🔍 1. The Prospector (`:9002`)
+- **Mission**: Ingests new leads, enriches tech stack and funding signals, computes multi-dimensional ICP scores (0.00–1.00), identifies executive buyer personas, and drafts personalized multi-touch outreach sequences.
+- **Workflow**: `research_company` → `enrich_lead` → `score_icp` → `identify_contacts` → `draft_sequences`.
 
-### 🎯 The Closer — Active Deal Management
-Monitors all pipeline deals for staleness and risk signals. When a deal goes silent (e.g., 10 days after pricing discussion), it classifies risk, fetches competitor battle cards from the Spy via **A2A**, retrieves objection-handling docs from **Pinecone RAG**, and drafts a contextual re-engagement email.
+### 🎯 2. The Closer (`:9001`)
+- **Mission**: Monitors active negotiation deals. Detects stall conditions (e.g. 7+ days silence after pricing) and buyer competitor objections.
+- **A2A Intelligence**: Queries the **Spy Agent via Google A2A protocol** to pull real-time competitor battlecards, synthesizes counter-arguments highlighting enterprise compliance, and drafts re-engagement messages.
+- **Workflow**: `analyze_deal` → `classify_risk` → `query_spy_a2a` → `handle_objection` → `draft_followup`.
 
-### 🛡 The Guardian — Customer Retention & Upsell
-Analyzes customer usage metrics, support ticket sentiment, and login frequency to score churn risk (0–1). Flags the highest-risk accounts with tailored retention plays — not generic templates, but strategies specific to each account's situation.
+### 🛡️ 3. The Guardian (`:9003`)
+- **Mission**: Scans customer account telemetry (API volume drops, login frequencies, open P1 tickets) to score predictive churn risk (0.00–1.00). Formulates bespoke 30-day retention action plans and executive briefing playbooks.
+- **Workflow**: `analyze_accounts` → `score_churn` → `rank_and_flag` → `generate_retention_playbook`.
 
-### 🕵 The Spy — Competitive Intelligence (A2A Server)
-The only agent that acts as an **A2A server**. Other agents call it on-demand for battle cards, competitor pricing history, and win-back strategies. Exposes skills via the `/.well-known/agent.json` Agent Card.
-
-### 🧠 The Orchestrator — Supervisor & Scheduler
-Central supervisor that dispatches work to sub-agents, runs autonomous pipeline scans, and provides a chat interface for sales managers to query system status using natural language.
-
----
-
-## ⚙ Tech Stack
-
-| Layer | Technology | Purpose |
-| :--- | :--- | :--- |
-| Agent Framework | **LangGraph 0.2+** | Cyclic graphs, HITL interrupt/resume, state checkpointing |
-| LLM (Complex) | **Groq** `llama-3.3-70b-versatile` | Risk classification, objection handling, email drafting |
-| LLM (Fast) | **Groq** `llama-3.1-8b-instant` | ICP scoring, data extraction, status checks |
-| Backend | **FastAPI** + Python 3.12 | REST API, WebSocket, agent task dispatch |
-| Frontend | **Next.js 14** (App Router) | Approval queue, deal pipeline, agent activity feed |
-| Database | **Neon PostgreSQL** | CRM state, RLS multi-tenancy, agent audit logs |
-| Vector Store | **Pinecone** | RAG for playbooks, battle cards, objection handling |
-| Event Bus | **Apache Kafka** | Async inter-agent messaging, event-driven triggers |
-| Cache | **Redis 7** | Agent state, rate limiting, WebSocket pub/sub |
-| MCP Protocol | **FastMCP** | Modular tool integration (CRM, Knowledge, Approvals) |
-| A2A Protocol | **A2A** (Google → LF) | Peer-to-peer agent intelligence sharing |
-| Container Orch. | **Kubernetes + KEDA** | Event-driven horizontal autoscaling on Kafka lag |
+### 🕵️ 4. The Spy Agent (`:8080`)
+- **Mission**: Standalone competitive intelligence agent exposing **Google A2A-compliant endpoints** (`get_battlecard`, `get_winback_strategy`, `get_competitor_usage`). Synthesizes live market differentiators, pricing weaknesses, and win-back tactics.
 
 ---
 
-## 📁 Project Structure
+## ⚖️ Deal Desk & Razorpay Governance
 
-```
-OmniSales/
-├── agents/
-│   ├── closer/              # Deal risk detection & re-engagement
-│   ├── prospector/           # Lead research & cold outreach
-│   ├── guardian/             # Churn prediction & retention
-│   ├── orchestrator/         # Central supervisor & scheduler
-│   └── spy/                  # A2A competitive intelligence server
-│
-├── mcp-servers/
-│   ├── approvals/            # Human-in-the-loop approval queue
-│   ├── crm/                  # Neon PostgreSQL CRM bridge
-│   └── knowledge/            # Pinecone RAG search server
-│
-├── api-gateway/              # FastAPI — REST + WebSocket + auth
-│   ├── main.py
-│   └── Dockerfile
-│
-├── dashboard/                # Next.js 14 — approval UI & pipeline view
-│   └── src/
-│
-├── shared/                   # Shared Python library
-│   ├── config.py             # Centralized configuration
-│   ├── db.py                 # Database pool & helpers
-│   ├── events.py             # Kafka event publishing
-│   ├── kafka.py              # Kafka consumer/producer
-│   ├── llm.py                # Groq LLM with key rotation
-│   ├── skills.py             # Prompt engineering packages
-│   └── state.py              # LangGraph agent state schema
-│
-├── db/
-│   ├── schema.sql            # PostgreSQL schema + RLS policies
-│   └── seed.sql              # Demo dataset (20 accounts, 15 deals)
-│
-├── k8s/                      # Kubernetes manifests
-│   ├── agents/               # Agent deployments + PDBs
-│   ├── gateway/              # API gateway deployment
-│   ├── keda/                 # KEDA ScaledObject configs
-│   ├── mcp/                  # MCP server deployments
-│   └── security/             # Istio mTLS + network policies
-│
-├── scripts/
-│   ├── reset_demo.py         # Reset database to clean demo state
-│   └── seed_pinecone.py      # Ingest docs into Pinecone
-│
-├── docker-compose.yml        # Full local development stack
-├── .env.example              # Environment variable template
-└── requirements.txt          # Python dependencies
-```
+OmniSales includes a deterministic **Commercial Governance Engine** (`shared/deal_policy.py`) that acts as a hard security boundary before generating billing invoices:
+
+1. **Commercial Policy Rules**:
+   - **Discount Threshold**: Max 20% discount (deals with >20% discount require VP approval override).
+   - **Contract Minimum**: Minimum 12-month commitment.
+   - **Payment Terms**: Net 30 standard.
+2. **Deterministic Violation Handling**:
+   - If a deal violates policy (e.g. 55% discount requested), Deal Desk blocks the checkout, logs the violation reason, and **generates an automated, policy-compliant counter-proposal**.
+3. **Razorpay Payment Link**:
+   - For cleared deals or authorized manager overrides, OmniSales invokes Razorpay's API to generate a real payment link with transaction tracking and audit logging.
+4. **Adversarial Hardening**:
+   - 100% block rate across 17/17 adversarial prompt-injection and commercial violation test cases (`tests/test_deal_desk_adversarial.py`).
 
 ---
 
-## 🚀 Quick Start
+## 🛰️ Real-Time Swarm Mission Control
+
+When clicking **"Scan CRM"** in the top navigation or overview dashboard:
+- A glassmorphic command drawer slides out and establishes a **Server-Sent Events (SSE) stream** (`GET /api/orchestrator/scan/stream`).
+- **Parallel Async Execution**: Runs all 3 subagent sweeps concurrently via `asyncio.gather` and an `asyncio.Queue`.
+- **Active Target Spotlight**: Highlights the exact entity currently under analysis with an animated laser scanning beam.
+- **Live Telemetry Counters**: Live counters for tokens streamed, signals detected, and tasks queued ticking up dynamically.
+- **One-Click Review**: Instant transition to the Human Approvals Queue once the sweep completes.
+
+---
+
+## ✉️ Human-in-the-Loop & Live Email Reply Loop
+
+1. **Human-in-the-Loop (HITL) Gate**: Every AI-generated outreach sequence, re-engagement draft, and retention playbook drops into `/dashboard/approvals`.
+2. **Rep-Editable Draft Modal**: Sales reps can edit subject lines and email body text before approving.
+3. **Real Email Dispatch via Resend**: Outbound emails are sent with clean HTML formatting and a hidden `[ref:xxxxxxxx]` deal tracking tag.
+4. **Autonomous Inbound Reply Poller**: A background IMAP poller checks the inbox, extracts the deal reference tag, appends the buyer's reply to `deals.closer_thread`, and automatically re-triggers the Closer Agent for the next turn of negotiation!
+
+---
+
+## 🧪 Evals, Reliability & LangSmith Tracing
+
+OmniSales includes a comprehensive automated evaluation and reliability framework:
+- **OpenEvals Golden-Set Benchmark**: 65 labeled scenarios across Closer (`evals/eval_closer.py`), Guardian (`evals/eval_guardian.py`), and Prospector (`evals/eval_prospector.py`).
+- **RAG Faithfulness & Retrieval Relevance**: Groundedness checks evaluated via OpenEvals prompt evaluators (`evals/eval_rag_faithfulness.py`).
+- **Consolidated Master Runner**: `python evals/run_all_evals.py` producing `evals/eval_report.json`.
+- **Live Reliability Scorecard**: Real-time approval rates, token usage metrics, cost analysis, and model distribution (`/dashboard/evals`).
+- **LangSmith Tracing**: Full execution tracing enabled via `LANGSMITH_API_KEY` with deep LangGraph run trees.
+
+---
+
+## 💻 Tech Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Agent Framework** | LangGraph 0.2+, LangChain, Python 3.12 |
+| **LLM Runtime** | Groq (`openai/gpt-oss-120b` for complex reasoning, `openai/gpt-oss-20b` for fast scoring) |
+| **Tool Integration** | FastMCP Protocol (Model Context Protocol) |
+| **Agent Communication** | Google A2A Protocol (Agent-to-Agent HTTP spec) |
+| **Commercial Billing** | Razorpay Payments API |
+| **Email Infrastructure** | Resend API (Outbound) + IMAP Polling Worker (Inbound) |
+| **Event Bus & Cache** | Apache Kafka, ZooKeeper, Redis 7 |
+| **Database** | Neon Cloud PostgreSQL (`asyncpg`) |
+| **Evaluation Suite** | OpenEvals, LangSmith |
+| **Frontend UI** | Next.js 16 (App Router, Turbopack, Tailwind CSS, Lucide Icons) |
+| **Orchestration** | Docker Compose, Kubernetes, KEDA |
+
+---
+
+## ⚡ Quick Start
 
 ### Prerequisites
+- Docker & Docker Desktop installed
+- Python 3.10+ & Node.js 20+ (for local scripts/development)
 
-- **Docker** & **Docker Compose** v2+
-- **Groq API Key** — [Get one free](https://console.groq.com)
-- **Neon PostgreSQL** — [Create a free project](https://neon.tech)
-- **Pinecone API Key** — [Get a free starter index](https://www.pinecone.io)
-
-### 1. Clone & Configure
-
+### 1. Clone & Configure Environment
 ```bash
 git clone https://github.com/Yugansh5013/OmniSales.git
 cd OmniSales
-
-# Copy the env template and fill in your API keys
 cp .env.example .env
 ```
+Fill in your API keys in `.env`:
+- `GROQ_API_KEY`: Groq Cloud API key (dual-model: `openai/gpt-oss-120b` & `openai/gpt-oss-20b`)
+- `DATABASE_URL`: Neon PostgreSQL connection string
+- `RAZORPAY_KEY_ID` & `RAZORPAY_KEY_SECRET`: Razorpay test keys (Commercial Governance)
+- `RESEND_API_KEY`: Resend email API key (Real outbound email dispatch)
+- `HUBSPOT_ACCESS_TOKEN` & `HUBSPOT_PORTAL_ID`: (Optional) HubSpot CRM Private App Token for live bidirectional CRM sync
+- `LANGSMITH_API_KEY`: (Optional) LangSmith tracing key
 
-### 2. Set Up the Database
-
-Run the schema and seed data against your Neon PostgreSQL instance:
-
+### 2. Start the Complete Stack
 ```bash
-psql "$DATABASE_URL" -f db/schema.sql
-psql "$DATABASE_URL" -f db/seed.sql
+docker compose up -d
 ```
+All 14 microservices will build and launch:
+- 🌐 Next.js Dashboard: [`http://localhost:3000`](http://localhost:3000)
+- ⚡ FastAPI Gateway: [`http://localhost:8000`](http://localhost:8000)
+- 💾 FastMCP CRM Server: `http://localhost:8001`
+- 📚 FastMCP Knowledge Server: `http://localhost:8003`
+- ✅ FastMCP Approvals Server: `http://localhost:8004`
+- 🕵️ Spy A2A Agent: `http://localhost:8080`
+- 🎯 Closer Agent: `http://localhost:9001`
+- 🔍 Prospector Agent: `http://localhost:9002`
+- 🛡️ Guardian Agent: `http://localhost:9003`
+- 🧠 Orchestrator Supervisor: `http://localhost:9004`
 
-### 3. Seed Pinecone (RAG Knowledge Base)
-
+### 3. Run Automated E2E Tests & Evals
 ```bash
-pip install -r requirements.txt
-python scripts/seed_pinecone.py
+# Run comprehensive 43-step end-to-end integration test suite
+python tests/e2e_test.py
+
+# Run Deal Desk adversarial test suite (17/17 security cases)
+python tests/test_deal_desk_adversarial.py
+
+# Run full 65-scenario OpenEvals reliability benchmark
+python evals/run_all_evals.py
 ```
-
-### 4. Launch the Full Stack
-
-```bash
-docker compose up --build
-```
-
-This starts **12 services**: Redis, Zookeeper, Kafka, 3 MCP Servers, 4 Agents (Closer, Prospector, Guardian, Orchestrator), Spy A2A Server, API Gateway, and the Dashboard.
-
-### 5. Access the Application
-
-| Service | URL |
-| :--- | :--- |
-| 🖥 **Dashboard** | [http://localhost:3000](http://localhost:3000) |
-| 📡 **API Docs** (Swagger) | [http://localhost:8000/docs](http://localhost:8000/docs) |
-| 🧠 **Orchestrator** | http://localhost:9004 |
-| 🎯 **Closer Agent** | http://localhost:9001 |
-| 🔍 **Prospector Agent** | http://localhost:9002 |
-| 🛡 **Guardian Agent** | http://localhost:9003 |
-| 🕵 **Spy A2A Server** | http://localhost:8080 |
-
----
-
-## 🔑 Environment Variables
-
-Copy `.env.example` to `.env` and configure:
-
-| Variable | Required | Description |
-| :--- | :---: | :--- |
-| `GROQ_API_KEYS` | ✅ | Comma-separated Groq API keys (rotation pool) |
-| `DATABASE_URL` | ✅ | Neon PostgreSQL connection string |
-| `PINECONE_API_KEY` | ✅ | Pinecone vector database key |
-| `PINECONE_INDEX` | ✅ | Pinecone index name (default: `omnisales-knowledge`) |
-| `OPENAI_API_KEY` | ✅ | For embedding generation (Pinecone ingestion) |
-| `KAFKA_BROKERS` | ⬜ | Auto-configured by Docker Compose |
-| `REDIS_URL` | ⬜ | Auto-configured by Docker Compose |
-| `LANGSMITH_API_KEY` | ⬜ | Optional — LLM tracing & observability |
-| `JWT_SECRET` | ⬜ | API authentication secret |
-
----
-
-## 📡 API Reference
-
-### Agent Triggers
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/deals/{deal_id}/trigger` | Trigger Closer agent on a specific deal |
-| `POST` | `/api/prospector/trigger` | Trigger Prospector on a target company |
-| `POST` | `/api/guardian/trigger` | Trigger Guardian churn analysis |
-| `POST` | `/api/orchestrator/scan` | Run full autonomous pipeline scan |
-| `POST` | `/api/orchestrator/chat` | Chat with the Orchestrator |
-
-### Approval Queue
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/tasks/pending` | List tasks awaiting approval |
-| `POST` | `/api/tasks/{id}/approve` | Approve an agent-drafted action |
-| `POST` | `/api/tasks/{id}/reject` | Reject with optional feedback |
-
-### Data
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/deals` | List all deals with risk classification |
-| `GET` | `/api/deals/{id}` | Deal details + audit trail |
-| `GET` | `/api/accounts` | List all customer accounts |
-| `GET` | `/api/leads` | List all leads with ICP scores |
-| `WS` | `/ws/live` | WebSocket for real-time events |
-
----
-
-## 🎬 Demo Scenarios
-
-The system covers all **3 mandatory Track 4 scenarios** with 5+ autonomous steps each:
-
-### Scenario 1 — Deal Risk Alert (Closer)
-> A $120K deal goes silent for 10 days after a pricing discussion.
-
-The Closer detects the staleness → classifies risk via LLM → fetches competitor battle cards from Spy (A2A) → retrieves objection-handling docs from Pinecone (RAG) → drafts a re-engagement email → pauses for human approval → sends on approval.
-
-```bash
-curl -X POST http://localhost:8000/api/deals/deal_4821/trigger
-```
-
-### Scenario 2 — Cold Outreach (Prospector)
-> Research a target company and draft personalized 3-email sequences for 2 decision-makers.
-
-The Prospector enriches company data → scores ICP (0.87, Tier A) → identifies VP Sales + CRO → drafts tailored sequences per persona → queues for human approval.
-
-```bash
-curl -X POST http://localhost:8000/api/prospector/trigger \
-  -H "Content-Type: application/json" \
-  -d '{"company": "Acme Corp", "vertical": "Fintech"}'
-```
-
-### Scenario 3 — Churn Prediction (Guardian)
-> Flag top 3 churn risks from 20 accounts with tailored retention plays.
-
-The Guardian loads all accounts → scores churn risk (0–1) → ranks top 3 → generates specific retention strategies per account → queues for CS manager approval.
-
-```bash
-curl -X POST http://localhost:8000/api/guardian/trigger
-```
-
----
-
-## ☸ Kubernetes & Scaling
-
-Production-ready K8s manifests are in `k8s/`. The system uses **KEDA** for event-driven autoscaling based on Kafka consumer lag (not CPU — the correct signal for I/O-bound LLM agents).
-
-| Workload | Min → Max Pods | Scale Trigger |
-| :--- | :---: | :--- |
-| Closer Agent | 2 → 10 | Kafka lag > 20 messages |
-| Prospector Agent | 1 → 12 | Kafka lag > 30 messages |
-| Guardian Agent | 1 → 8 | Kafka lag > 25 messages |
-| Spy Agent | 0 → 5 | Kafka lag + cron |
-| API Gateway | 2 → 8 | CPU ≥ 70% |
-
-Key features:
-- **Namespace isolation** — agents, MCP servers, gateway, and data in separate namespaces
-- **Istio mTLS (STRICT)** — zero-trust encrypted service-to-service communication
-- **PodDisruptionBudgets** — minimum availability during rolling updates
-- **HashiCorp Vault** — dynamic secret injection for API keys
-- **ArgoCD** — GitOps declarative deployments
 
 ---
 
 ## 📚 Documentation
 
-| Document | Description |
-| :--- | :--- |
-| [`omnisales_detailed_report.md`](omnisales_detailed_report.md) | Full technical architecture, financial impact model (INR), innovation analysis, and scaling strategy |
-| [`project_des.md`](project_des.md) | Complete engineering blueprint with code examples and Kubernetes manifests |
-| [`OmniSales_Detailed_Report.pdf`](OmniSales_Detailed_Report.pdf) | PDF version with rendered architecture flowcharts |
-| [`db/schema.sql`](db/schema.sql) | PostgreSQL schema with RLS policies |
-| [`db/seed.sql`](db/seed.sql) | Demo dataset (20 accounts, 15 deals, 5 prospects) |
-| [`.env.example`](.env.example) | Environment variable reference |
+Comprehensive architectural, operational, and integration guides are available in the [`docs/`](docs/) directory:
 
----
+- **[System Architecture & Tri-Protocol Specification](docs/README.md)**: Master documentation hub.
+- **[Autonomous Agent Swarm](docs/agents/README.md)**: Deep dives on [Closer](docs/agents/closer.md), [Prospector](docs/agents/prospector.md), [Guardian](docs/agents/guardian.md), [Spy](docs/agents/spy.md), and [Orchestrator](docs/agents/orchestrator.md).
+- **[API Gateway & Inbound Reply Poller](docs/api-gateway/README.md)**: REST routing, IMAP watchers, and HubSpot sync.
+- **[FastMCP Protocol Servers](docs/mcp-servers/README.md)**: [CRM & HubSpot Sync](docs/mcp-servers/crm.md), [Pinecone Knowledge RAG](docs/mcp-servers/knowledge.md), and [HITL Approvals](docs/mcp-servers/approvals.md).
+- **[Next.js 16 Dashboard](docs/dashboard/README.md)**: Modern UI architecture, components, and real-time SSE stream.
+- **[Commercial Governance & Shared Kernel](docs/shared/README.md)**: Deal Desk policy engine, Razorpay billing, and Groq LLM routing.
+- **[Evals & Reliability Benchmark](docs/evals/README.md)**: OpenEvals 65-scenario suite, LangSmith tracing, and cost tracking.
+- **[Distributed Cloud & Kubernetes Scaling](docs/scaling_and_infrastructure.md)**: Enterprise production scaling topology.
 
-## 🏆 Key Differentiators
-
-- **Not a CRM add-on** — a complete autonomous revenue system
-- **Three-protocol architecture** (MCP + A2A + Kafka) — never done before in sales tech
-- **Human-in-the-Loop at 3 layers** — LangGraph interrupt, MCP approval server, and database constraint
-- **Event-driven scaling** — KEDA on Kafka lag, not CPU (correct signal for LLM agents)
-- **Zero vendor lock-in** — swap any tool by changing an MCP server URL, zero agent code changes
-
----
-
-<p align="center">
-  <strong>Built with ❤️ for the ET GenAI Hackathon</strong><br/>
-  <em>LangGraph · MCP · A2A · Kafka · Kubernetes · Groq</em>
-</p>
